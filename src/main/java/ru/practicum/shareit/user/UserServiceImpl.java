@@ -30,6 +30,7 @@ public class UserServiceImpl {
         log.info("Получение перечня всех пользователей");
         return inMemoryUserStorage.users.values();
     }
+
     public User getUserById(int userId) {
         return inMemoryUserStorage.getUserById(userId);
     }
