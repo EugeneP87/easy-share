@@ -1,26 +1,32 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.user.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.AlreadyExistException;
 import ru.practicum.shareit.exception.IncorrectParameterException;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.mapper.UserMapper;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
 @Repository
-public class InMemoryUserStorage implements UserService {
+public class InMemoryUserStorage implements UserStorage {
 
     public final Map<Integer, User> users = new HashMap<>();
-    private int userId = 1;
+    private static int userId = 1;
+
+    private static int generateUserId() {
+        return userId++;
+    }
 
     @Override
     public User create(User user) {
         checkUserForFailAndDuplicateEmail(user);
-        user.setId(userId++);
+        user.setId(generateUserId());
         users.put(user.getId(), user);
         log.info("Создание нового пользователя " + user);
         return user;
@@ -28,12 +34,12 @@ public class InMemoryUserStorage implements UserService {
 
     @Override
     public UserDto update(int id, UserDto userDto) {
-        User currentUser = users.get(id);
         if (users.values().stream()
                 .filter(user -> user.getEmail().equals(userDto.getEmail()))
                 .anyMatch(user -> !user.getId().equals(id))) {
             throw new AlreadyExistException("Ошибка: пользователь с таким Email уже зарегистрирован");
         }
+        User currentUser = users.get(id);
         if (userDto.getName() != null) {
             currentUser.setName(userDto.getName());
         }

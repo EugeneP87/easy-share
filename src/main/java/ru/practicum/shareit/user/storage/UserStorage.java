@@ -1,8 +1,9 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.user.storage;
 
+import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.dto.UserDto;
 
-public interface UserService {
+public interface UserStorage {
 
     User create(User user);
 

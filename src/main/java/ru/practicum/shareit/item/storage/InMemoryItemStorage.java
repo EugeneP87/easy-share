@@ -1,12 +1,14 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.item.storage;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.IncorrectParameterException;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.user.InMemoryUserStorage;
+import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.user.storage.InMemoryUserStorage;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,11 +18,15 @@ import java.util.stream.Collectors;
 @Slf4j
 @Repository
 @RequiredArgsConstructor
-public class InMemoryItemStorage implements ItemService {
+public class InMemoryItemStorage implements ItemStorage {
 
     private final Map<Integer, Item> items = new HashMap<>();
     private final InMemoryUserStorage inMemoryUserStorage;
-    private int itemId = 1;
+    private static int itemId = 1;
+
+    private static int generateItemId() {
+        return itemId++;
+    }
 
     @Override
     public ItemDto create(Integer userId, ItemDto itemDto) {
@@ -28,7 +34,7 @@ public class InMemoryItemStorage implements ItemService {
         checkItemEmptyNameAndDescription(itemDto);
         checkItemAvailability(itemDto);
         Item createItem = ItemMapper.toItem(itemDto);
-        createItem.setId(itemId++);
+        createItem.setId(generateItemId());
         createItem.setOwner(userId);
         items.put(createItem.getId(), createItem);
         log.info("Создание вещи " + createItem + " пользователем с ID " + userId);

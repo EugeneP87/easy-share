@@ -1,20 +1,26 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.item.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.item.storage.InMemoryItemStorage;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
 @Slf4j
-@RequiredArgsConstructor
 @Service
 public class ItemServiceImpl {
 
     private final InMemoryItemStorage inMemoryItemStorage;
+
+    @Autowired
+    public ItemServiceImpl(InMemoryItemStorage inMemoryItemStorage) {
+        this.inMemoryItemStorage = inMemoryItemStorage;
+    }
 
     public ItemDto create(int userId, ItemDto itemDto) {
         return inMemoryItemStorage.create(userId, itemDto);

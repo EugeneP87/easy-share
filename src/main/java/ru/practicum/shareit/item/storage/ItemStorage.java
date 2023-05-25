@@ -1,10 +1,11 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.item.storage;
 
+import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.dto.ItemDto;
 
 import java.util.Collection;
 
-public interface ItemService {
+public interface ItemStorage {
 
     ItemDto create(Integer userId, ItemDto itemDto);
 
