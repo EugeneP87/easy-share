@@ -3,18 +3,18 @@ package ru.practicum.shareit.item.mapper;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.dto.ItemDto;
 
-public final class ItemMapper {
+/**
+ * Класс ItemMapper отвечает за преобразование объектов типа Item в объекты типа ItemDto.
+ */
 
-    public ItemMapper() {
-    }
+public class ItemMapper {
 
     public static ItemDto toItemDto(Item item) {
         return new ItemDto(
                 item.getId(),
                 item.getName(),
                 item.getDescription(),
-                item.getAvailable(),
-                item.getRequest() != null ? item.getRequest() : null
+                item.getAvailable()
         );
     }
 
@@ -23,8 +23,7 @@ public final class ItemMapper {
                 itemDto.getId(),
                 itemDto.getName(),
                 itemDto.getDescription(),
-                itemDto.getAvailable(),
-                itemDto.getRequest()
+                itemDto.getAvailable()
         );
     }
 
