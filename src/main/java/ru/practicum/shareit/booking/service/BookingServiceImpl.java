@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
-import ru.practicum.shareit.booking.State;
 import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.PartialBookingDto;
@@ -71,65 +70,56 @@ public class BookingServiceImpl {
     public List<BookingDto> findAllBookingsByUserId(int userId, String state) {
         userServiceImpl.getUserById(userId);
         List<Booking> booking;
-        if (State.ALL.name().equals(state)) {
-            booking = bookingRepository.findByBookerIdOrderByStartDesc(userId);
-            return BookingMapper.toBookingDto(booking);
+        switch (state) {
+            case "ALL":
+                booking = bookingRepository.findByBookerIdOrderByStartDesc(userId);
+                break;
+            case "CURRENT":
+                booking = bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(
+                        userId, LocalDateTime.now(), LocalDateTime.now());
+                break;
+            case "PAST":
+                booking = bookingRepository.findByBookerIdAndEndIsBeforeOrderByStartDesc(userId, LocalDateTime.now());
+                break;
+            case "FUTURE":
+                booking = bookingRepository.findAllByBookerIdAndStartIsAfterAndEndIsAfterOrderByStartDesc(
+                        userId, LocalDateTime.now(), LocalDateTime.now());
+                break;
+            case "WAITING":
+            case "REJECTED":
+                booking = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.valueOf(state));
+                break;
+            default:
+                throw new IncorrectParameterException(String.format("Unknown state: %s", state));
         }
-        if (State.CURRENT.name().equals(state)) {
-            booking = bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(
-                    userId, LocalDateTime.now(), LocalDateTime.now());
-            return BookingMapper.toBookingDto(booking);
-        }
-        if (State.PAST.name().equals(state)) {
-            booking = bookingRepository.findByBookerIdAndEndIsBeforeOrderByStartDesc(
-                    userId, LocalDateTime.now());
-            return BookingMapper.toBookingDto(booking);
-        }
-        if (State.FUTURE.name().equals(state)) {
-            booking = bookingRepository.findAllByBookerIdAndStartIsAfterAndEndIsAfterOrderByStartDesc(
-                    userId, LocalDateTime.now(), LocalDateTime.now());
-            return BookingMapper.toBookingDto(booking);
-        }
-        if (State.WAITING.name().equals(state)) {
-            booking = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.valueOf(state));
-            return BookingMapper.toBookingDto(booking);
-        }
-        if (State.REJECTED.name().equals(state)) {
-            booking = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.valueOf(state));
-            return BookingMapper.toBookingDto(booking);
-        }
-        throw new IncorrectParameterException(String.format("Unknown state: %s", state));
+        return BookingMapper.toBookingDto(booking);
     }
 
     @Transactional
     public List<BookingDto> findAllBookingsByOwnerId(String state, int ownerId) {
         userServiceImpl.getUserById(ownerId);
         List<Booking> booking;
-        if (State.ALL.name().equals(state)) {
-            booking = bookingRepository.findAllByItemOwnerIdOrderByStartDesc(ownerId);
-            return BookingMapper.toBookingDto(booking);
+        switch (state) {
+            case "ALL":
+                booking = bookingRepository.findAllByItemOwnerIdOrderByStartDesc(ownerId);
+                break;
+            case "CURRENT":
+                booking = bookingRepository.findByItemOwnerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(ownerId, LocalDateTime.now(), LocalDateTime.now());
+                break;
+            case "PAST":
+                booking = bookingRepository.findByItemOwnerIdAndEndIsBeforeOrderByStartDesc(ownerId, LocalDateTime.now());
+                break;
+            case "FUTURE":
+                booking = bookingRepository.findByItemOwnerIdAndStartIsAfterAndEndIsAfterOrderByStartDesc(ownerId, LocalDateTime.now(), LocalDateTime.now());
+                break;
+            case "WAITING":
+            case "REJECTED":
+                booking = bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(ownerId, Status.valueOf(state));
+                break;
+            default:
+                throw new IncorrectParameterException(String.format("Unknown state: %s", state));
         }
-        if (State.CURRENT.name().equals(state)) {
-            booking = bookingRepository.findByItemOwnerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(ownerId, LocalDateTime.now(), LocalDateTime.now());
-            return BookingMapper.toBookingDto(booking);
-        }
-        if (State.PAST.name().equals(state)) {
-            booking = bookingRepository.findByItemOwnerIdAndEndIsBeforeOrderByStartDesc(ownerId, LocalDateTime.now());
-            return BookingMapper.toBookingDto(booking);
-        }
-        if (State.FUTURE.name().equals(state)) {
-            booking = bookingRepository.findByItemOwnerIdAndStartIsAfterAndEndIsAfterOrderByStartDesc(ownerId, LocalDateTime.now(), LocalDateTime.now());
-            return BookingMapper.toBookingDto(booking);
-        }
-        if (State.WAITING.name().equals(state)) {
-            booking = bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(ownerId, Status.valueOf(state));
-            return BookingMapper.toBookingDto(booking);
-        }
-        if (State.REJECTED.name().equals(state)) {
-            booking = bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(ownerId, Status.valueOf(state));
-            return BookingMapper.toBookingDto(booking);
-        }
-        throw new IncorrectParameterException(String.format("Unknown state: %s", state));
+        return BookingMapper.toBookingDto(booking);
     }
 
     @Transactional
@@ -145,7 +135,7 @@ public class BookingServiceImpl {
         if ((!booking.getStatus().equals(Status.WAITING))) {
             throw new NotFoundException("Обновление статуса недоступно");
         }
-        if (approved) {
+        if (approved != null && approved) {
             booking.setStatus(Status.APPROVED);
         } else {
             booking.setStatus(Status.REJECTED);

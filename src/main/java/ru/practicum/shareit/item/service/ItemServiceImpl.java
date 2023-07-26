@@ -102,23 +102,19 @@ public class ItemServiceImpl {
         LocalDateTime now = LocalDateTime.now();
         List<Booking> bookings = bookingRepository.findAllBookingsItem(itemDto.getId());
         Booking lastBooking = null;
+        Booking nextBooking = null;
         for (Booking booking : bookings) {
-            if (booking.getStatus() != Status.REJECTED && booking.getStart().isBefore(now)) {
-                if (lastBooking == null || booking.getStart().isAfter(lastBooking.getStart())) {
-                    lastBooking = booking;
-                }
+            if (booking.getStatus() != Status.REJECTED && booking.getStart().isBefore(now)
+                    && (lastBooking == null || booking.getStart().isAfter(lastBooking.getStart()))) {
+                lastBooking = booking;
+            }
+            if (!booking.getStatus().equals(Status.REJECTED) && booking.getStart().isAfter(now)
+                    && (nextBooking == null || booking.getStart().isBefore(nextBooking.getStart()))) {
+                nextBooking = booking;
             }
         }
         if (lastBooking != null) {
             itemDto.setLastBooking(BookingMapper.toPartialBookingDto(lastBooking));
-        }
-        Booking nextBooking = null;
-        for (Booking booking : bookings) {
-            if (!booking.getStatus().equals(Status.REJECTED) && booking.getStart().isAfter(now)) {
-                if (nextBooking == null || booking.getStart().isBefore(nextBooking.getStart())) {
-                    nextBooking = booking;
-                }
-            }
         }
         if (nextBooking != null) {
             itemDto.setNextBooking(BookingMapper.toPartialBookingDto(nextBooking));
