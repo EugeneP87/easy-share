@@ -13,6 +13,7 @@ import java.util.Collection;
 /**
  * Класс контроллеров User
  */
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -21,14 +22,14 @@ public class UserController {
 
     private final UserServiceImpl userServiceImpl;
 
-    @PostMapping()
+    @PostMapping
     public User create(@Valid @RequestBody User user) {
         log.info("Создание нового пользователя");
         return userServiceImpl.create(user);
     }
 
     @PatchMapping("/{id}")
-    public UserDto update(@PathVariable int id, @Valid @RequestBody UserDto userDto) {
+    public UserDto update(@PathVariable int id, @RequestBody UserDto userDto) {
         log.info("Обновление пользователя с ID " + id);
         return userServiceImpl.update(id, userDto);
     }
@@ -39,10 +40,10 @@ public class UserController {
         userServiceImpl.delete(id);
     }
 
-    @GetMapping()
+    @GetMapping
     public Collection<User> findAll() {
         log.info("Получение перечня всех пользователей");
-        return userServiceImpl.findAll();
+        return userServiceImpl.findAllUsers();
     }
 
     @GetMapping("/{id}")

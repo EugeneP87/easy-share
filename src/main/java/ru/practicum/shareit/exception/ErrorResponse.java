@@ -1,6 +1,6 @@
 package ru.practicum.shareit.exception;
 
-public class ErrorResponse  {
+public class ErrorResponse {
 
     private final String error;
 
@@ -11,6 +11,5 @@ public class ErrorResponse  {
     public String getError() {
         return error;
     }
-
 
 }
