@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -80,6 +81,15 @@ public class ExceptionTest {
         String message = "This item already exists.";
         AlreadyExistException exception = new AlreadyExistException(message);
         assertEquals(message, exception.getMessage());
+    }
+
+    @Test
+    public void constructorWithMessage() {
+        String errorMessage = "Invalid parameter";
+        IncorrectParameterException exception = assertThrows(IncorrectParameterException.class, () -> {
+            throw new IncorrectParameterException(errorMessage);
+        });
+        assertEquals(errorMessage, exception.getMessage());
     }
 
 }
