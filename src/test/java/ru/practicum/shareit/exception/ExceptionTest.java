@@ -92,4 +92,11 @@ public class ExceptionTest {
         assertEquals(errorMessage, exception.getMessage());
     }
 
+    @Test
+    public void testConstructorWithMessage() {
+        String message = "This is a validation error.";
+        ValidationException exception = new ValidationException(message);
+        assertEquals(message, exception.getMessage());
+    }
+
 }
