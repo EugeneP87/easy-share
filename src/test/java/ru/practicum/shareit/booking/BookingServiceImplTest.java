@@ -30,8 +30,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class BookingServiceImplTest {
@@ -252,9 +251,8 @@ public class BookingServiceImplTest {
         assertEquals("Unknown state: UNKNOWN", exception.getMessage());
     }
 
-
     @Test
-    public void findAllBookingsByUserIdAllState() {
+    public void findAllBookingsByUserIdAllStateAll() {
         int userId = 1;
         String state = "ALL";
         int from = 0;
@@ -263,6 +261,193 @@ public class BookingServiceImplTest {
         when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
         when(bookingRepository.findByBookerIdOrderByStartDesc(eq(userId), any(PageRequest.class))).thenReturn(bookings);
         List<BookingDto> result = bookingService.findAllBookingsByUserId(userId, state, from, size);
+        assertEquals(bookings.size(), result.size());
+    }
+
+    @Test
+    public void findAllBookingsByUserIdAllStateCurrent() {
+        int userId = 1;
+        String state = "CURRENT";
+        int from = 0;
+        int size = 10;
+        List<Booking> bookings = createBookingList(userId, 0);
+        when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
+        lenient().when(bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(
+                eq(userId),
+                eq(LocalDateTime.now().minusDays(2)),
+                eq(LocalDateTime.now().plusDays(2)),
+                any(PageRequest.class)
+        )).thenReturn(bookings);
+        List<BookingDto> result = bookingService.findAllBookingsByUserId(userId, state, from, size);
+        assertEquals(bookings.size(), result.size());
+    }
+
+    @Test
+    public void findAllBookingsByUserIdAllStatePast() {
+        int userId = 1;
+        String state = "PAST";
+        int from = 0;
+        int size = 10;
+        List<Booking> bookings = createBookingList(userId, 0);
+        when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
+        lenient().when(bookingRepository.findByBookerIdAndEndIsBeforeOrderByStartDesc(
+                eq(userId),
+                eq(LocalDateTime.now().minusDays(2)),
+                any(PageRequest.class)
+        )).thenReturn(bookings);
+        List<BookingDto> result = bookingService.findAllBookingsByUserId(userId, state, from, size);
+        assertEquals(bookings.size(), result.size());
+    }
+
+    @Test
+    public void findAllBookingsByUserIdAllStateFuture() {
+        int userId = 1;
+        String state = "FUTURE";
+        int from = 0;
+        int size = 10;
+        List<Booking> bookings = createBookingList(userId, 0);
+        when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
+        lenient().when(bookingRepository.findAllByBookerIdAndStartIsAfterAndEndIsAfterOrderByStartDesc(
+                eq(userId),
+                eq(LocalDateTime.now().plusDays(1)),
+                eq(LocalDateTime.now().plusDays(2)),
+                any(PageRequest.class)
+        )).thenReturn(bookings);
+        List<BookingDto> result = bookingService.findAllBookingsByUserId(userId, state, from, size);
+        assertEquals(bookings.size(), result.size());
+    }
+
+    @Test
+    public void findAllBookingsByUserIdAllStateWaiting() {
+        int userId = 1;
+        String state = "WAITING";
+        int from = 0;
+        int size = 10;
+        List<Booking> bookings = createBookingList(userId, 0);
+        when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
+        lenient().when(bookingRepository.findByBookerIdAndStatusOrderByStartDesc(
+                eq(userId),
+                eq(Status.WAITING),
+                any(PageRequest.class)
+        )).thenReturn(bookings);
+        List<BookingDto> result = bookingService.findAllBookingsByUserId(userId, state, from, size);
+        assertEquals(bookings.size(), result.size());
+    }
+
+    @Test
+    public void findAllBookingsByUserIdAllStateRejected() {
+        int userId = 1;
+        String state = "REJECTED";
+        int from = 0;
+        int size = 10;
+        List<Booking> bookings = createBookingList(userId, 0);
+        when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
+        lenient().when(bookingRepository.findByBookerIdAndStatusOrderByStartDesc(
+                eq(userId),
+                eq(Status.REJECTED),
+                any(PageRequest.class)
+        )).thenReturn(bookings);
+        List<BookingDto> result = bookingService.findAllBookingsByUserId(userId, state, from, size);
+        assertEquals(bookings.size(), result.size());
+    }
+
+    @Test
+    public void findAllBookingsByOwnerIdAllStateAll() {
+        int userId = 1;
+        String state = "ALL";
+        int from = 0;
+        int size = 10;
+        List<Booking> bookings = createBookingList(userId, 5);
+        when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
+        when(bookingRepository.findAllByItemOwnerIdOrderByStartDesc(eq(userId), any(PageRequest.class))).thenReturn(bookings);
+        List<BookingDto> result = bookingService.findAllBookingsByOwnerId(state, userId, from, size);
+        assertEquals(bookings.size(), result.size());
+    }
+
+    @Test
+    public void findAllBookingsByOwnerIdAllStateCurrent() {
+        int userId = 1;
+        String state = "CURRENT";
+        int from = 0;
+        int size = 10;
+        List<Booking> bookings = createBookingList(userId, 0);
+        when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
+        lenient().when(bookingRepository.findByItemOwnerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(
+                eq(userId),
+                eq(LocalDateTime.now().minusDays(2)),
+                eq(LocalDateTime.now().plusDays(2)),
+                any(PageRequest.class)
+        )).thenReturn(bookings);
+        List<BookingDto> result = bookingService.findAllBookingsByOwnerId(state, userId, from, size);
+        assertEquals(bookings.size(), result.size());
+    }
+
+    @Test
+    public void findAllBookingsByOwnerIdAllStatePast() {
+        int userId = 1;
+        String state = "PAST";
+        int from = 0;
+        int size = 10;
+        List<Booking> bookings = createBookingList(userId, 0);
+        when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
+        lenient().when(bookingRepository.findByItemOwnerIdAndEndIsBeforeOrderByStartDesc(
+                eq(userId),
+                eq(LocalDateTime.now().minusDays(2)),
+                any(PageRequest.class)
+        )).thenReturn(bookings);
+        List<BookingDto> result = bookingService.findAllBookingsByOwnerId(state, userId, from, size);
+        assertEquals(bookings.size(), result.size());
+    }
+
+    @Test
+    public void findAllBookingsByOwnerIdAllStateFuture() {
+        int userId = 1;
+        String state = "FUTURE";
+        int from = 0;
+        int size = 10;
+        List<Booking> bookings = createBookingList(userId, 0);
+        when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
+        lenient().when(bookingRepository.findByItemOwnerIdAndStartIsAfterAndEndIsAfterOrderByStartDesc(
+                eq(userId),
+                eq(LocalDateTime.now().plusDays(1)),
+                eq(LocalDateTime.now().plusDays(2)),
+                any(PageRequest.class)
+        )).thenReturn(bookings);
+        List<BookingDto> result = bookingService.findAllBookingsByOwnerId(state, userId, from, size);
+        assertEquals(bookings.size(), result.size());
+    }
+
+    @Test
+    public void findAllBookingsByOwnerIdAllStateWaiting() {
+        int userId = 1;
+        String state = "WAITING";
+        int from = 0;
+        int size = 10;
+        List<Booking> bookings = createBookingList(userId, 0);
+        when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
+        lenient().when(bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(
+                eq(userId),
+                eq(Status.WAITING),
+                any(PageRequest.class)
+        )).thenReturn(bookings);
+        List<BookingDto> result = bookingService.findAllBookingsByOwnerId(state, userId, from, size);
+        assertEquals(bookings.size(), result.size());
+    }
+
+    @Test
+    public void findAllBookingsByOwnerIdAllStateRejected() {
+        int userId = 1;
+        String state = "REJECTED";
+        int from = 0;
+        int size = 10;
+        List<Booking> bookings = createBookingList(userId, 0);
+        when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
+        lenient().when(bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(
+                eq(userId),
+                eq(Status.REJECTED),
+                any(PageRequest.class)
+        )).thenReturn(bookings);
+        List<BookingDto> result = bookingService.findAllBookingsByOwnerId(state, userId, from, size);
         assertEquals(bookings.size(), result.size());
     }
 

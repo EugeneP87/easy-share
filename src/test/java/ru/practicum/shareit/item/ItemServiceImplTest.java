@@ -1,10 +1,9 @@
 package ru.practicum.shareit.item;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 import ru.practicum.shareit.booking.Booking;
@@ -13,9 +12,11 @@ import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.comment.Comment;
 import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.comment.repository.CommentRepository;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemServiceImpl;
+import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -28,8 +29,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,8 +45,17 @@ public class ItemServiceImplTest {
     private ItemRequestRepository itemRequestRepository;
     @Mock
     private UserServiceImpl userServiceImpl;
+    @Captor
+    ArgumentCaptor<Item> itemArgumentCaptor;
     @InjectMocks
     private ItemServiceImpl itemService;
+
+    @BeforeEach
+    public void setUp() {
+        itemRepository = mock(ItemRepository.class);
+        userServiceImpl = mock(UserServiceImpl.class);
+        itemService = new ItemServiceImpl(bookingRepository, commentRepository, itemRepository, itemRequestRepository, userServiceImpl);
+    }
 
 
     @Test
@@ -175,6 +184,82 @@ public class ItemServiceImplTest {
         assertNotEquals(testComment.getItem(), commentDto.getItem());
         assertEquals(testComment.getText(), commentDto.getText());
         assertEquals(testComment.getAuthorName(), commentDto.getAuthorName());
+    }
+
+    @Test
+    public void searchWithEmptyText() {
+        ItemRepository itemRepositoryMock = mock(ItemRepository.class);
+        ItemServiceImpl itemService = new ItemServiceImpl(bookingRepository, commentRepository, itemRepository, itemRequestRepository, userServiceImpl);
+        List<ItemDto> result = itemService.search("", 0, 10);
+        assertTrue(result.isEmpty());
+        verifyNoInteractions(itemRepositoryMock);
+    }
+
+    @Test
+    void updateItem() {
+        User user = new User(1, "User", "user@user.com");
+        Item item = new Item(1, "User", "Description", true, 1,
+                new ItemRequest(2,
+                        "Description", new User(1, "User", "user@user.com"),
+                        LocalDateTime.of(2023, 7, 31, 12, 0, 0)));
+        ItemDto itemDto = new ItemDto(1, "Name", "Description", true, 2);
+        item.setOwnerId(1);
+        when(itemRepository.findById(anyInt())).thenReturn(Optional.of(item));
+        when(itemRepository.save(any())).thenReturn(item);
+        ItemDto actualItem = itemService.update(item.getId(), user.getId(), itemDto);
+        verify(itemRepository).save(itemArgumentCaptor.capture());
+        Item savedItem = itemArgumentCaptor.getValue();
+        assertEquals(itemDto.getName(), savedItem.getName());
+        assertEquals(itemDto.getDescription(), savedItem.getDescription());
+    }
+
+    @Test
+    void updateItemNotOwner() {
+        int itemId = 1;
+        int userId = 1;
+        Item existingItem = new Item(itemId, "User", "Description", true, 2,
+                new ItemRequest(2, "Description", new User(2, "OtherUser", "otheruser@user.com"),
+                        LocalDateTime.of(2023, 7, 31, 12, 0, 0)));
+        ItemDto itemDto = new ItemDto(itemId, "Name", "Description", true, userId);
+        existingItem.setOwnerId(2);
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(existingItem));
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> itemService.update(itemId, userId, itemDto));
+        assertEquals("Пользователь не является владельцем вещи", exception.getMessage());
+        verify(itemRepository, times(1)).findById(itemId);
+        verify(userServiceImpl, times(1)).getUserById(userId);
+        verifyNoMoreInteractions(itemRepository, userServiceImpl);
+    }
+
+    @Test
+    public void testUpdateItemWhenItemNotFound() {
+        int itemId = 1;
+        int userId = 1;
+        ItemDto itemDto = new ItemDto(itemId, "Name", "Description", true, userId);
+        when(itemRepository.findById(itemId)).thenReturn(Optional.empty());
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> itemService.update(itemId, userId, itemDto));
+        assertEquals("Вещь не найдена", exception.getMessage());
+        verify(itemRepository, times(1)).findById(itemId);
+        verifyNoMoreInteractions(itemRepository, userServiceImpl);
+    }
+
+    @Test
+    public void testUpdateItemWhenNoOwnerId() {
+        int itemId = 1;
+        int userId = 1;
+        Item existingItem = new Item(itemId, "User", "Description", true, 2,
+                new ItemRequest(2, "Description",
+                        new User(2, "OtherUser", "otheruser@user.com"),
+                        LocalDateTime.of(2023, 7, 31, 12, 0, 0)));
+        ItemDto itemDto = new ItemDto(itemId, "Name", "Description", true, userId);
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(existingItem));
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> itemService.update(itemId, userId, itemDto));
+        assertEquals("ID владельца вещи отсутствует", exception.getMessage());
+        verify(itemRepository, times(1)).findById(itemId);
+        verify(userServiceImpl, times(1)).getUserById(userId);
+        verifyNoMoreInteractions(itemRepository, userServiceImpl);
     }
 
 }
