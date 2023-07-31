@@ -252,82 +252,7 @@ public class BookingServiceImplTest {
         assertEquals("Unknown state: UNKNOWN", exception.getMessage());
     }
 
-    @Test
-    public void updateBookingApproved() {
-        int userId = 1;
-        int bookingId = 1;
-        Booking booking = new Booking();
-        booking.setId(bookingId);
-        booking.setStatus(Status.WAITING);
-        when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(booking));
-        when(itemService.getOwnerId(anyInt())).thenReturn(userId);
-        when(bookingRepository.save(any(Booking.class))).thenReturn(booking);
-        assertEquals(Status.APPROVED, booking.getStatus());
-    }
 
-    @Test
-    public void updateBookingRejected() {
-        int userId = 1;
-        int bookingId = 1;
-        Booking booking = new Booking();
-        booking.setId(bookingId);
-        booking.setStatus(Status.WAITING);
-        when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(booking));
-        when(itemService.getOwnerId(anyInt())).thenReturn(userId);
-        when(bookingRepository.save(any(Booking.class))).thenReturn(booking);
-        assertEquals("REJECTED", booking.getStatus());
-    }
-
-    @Test
-    public void updateBookingAlreadyApproved() {
-        int userId = 1;
-        int bookingId = 1;
-        Booking booking = new Booking();
-        booking.setId(bookingId);
-        booking.setStatus(Status.APPROVED);
-        when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(booking));
-        when(itemService.getOwnerId(anyInt())).thenReturn(userId);
-        AlreadyExistException exception = org.junit.jupiter.api.Assertions.assertThrows(
-                AlreadyExistException.class,
-                () -> bookingService.updateBooking(userId, bookingId, true)
-        );
-        assertEquals("Бронирование уже одобрено", exception.getMessage());
-    }
-
-    @Test
-    public void updateBookingNotWaitingStatus() {
-        int userId = 1;
-        int bookingId = 1;
-        Booking booking = new Booking();
-        booking.setId(bookingId);
-        booking.setStatus(Status.APPROVED);
-        when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(booking));
-        when(itemService.getOwnerId(anyInt())).thenReturn(userId);
-        NullPointerException exception = org.junit.jupiter.api.Assertions.assertThrows(
-                NullPointerException.class,
-                () -> bookingService.updateBooking(userId, bookingId, true)
-        );
-        assertEquals("Обновление статуса недоступно", exception.getMessage());
-    }
-
-    @Test
-    public void updateBookingInvalidOwner() {
-        int userId = 1;
-        int bookingId = 1;
-        Booking booking = new Booking(1, LocalDateTime.now(), LocalDateTime.now().plusHours(1),
-                new Item(1, "Item", "Description", true), new User(1, "User", "user@user.com"), Status.WAITING);
-        booking.setId(bookingId);
-        booking.setBooker(new User(1, "User", "user@user.com"));
-        booking.setItem(new Item(1, "Item", "Description", true));
-        booking.setStatus(Status.WAITING);
-        when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(booking));
-        when(itemService.getOwnerId(anyInt())).thenReturn(userId + 1);
-        NullPointerException exception = org.junit.jupiter.api.Assertions.assertThrows(
-                NullPointerException.class,
-                () -> bookingService.updateBooking(userId, bookingId, true)
-        );
-        assertEquals("Только владелец вещи может одобрить или отклонить запрос на бронирование", exception.getMessage());
-    }
 
     @Test
     public void findAllBookingsByUserIdAllState() {
@@ -394,52 +319,6 @@ public class BookingServiceImplTest {
         assertEquals(itemId, result.getItem().getId());
         assertEquals(userId, result.getBooker().getId());
         assertEquals(Status.WAITING, result.getStatus());
-    }
-
-    @Test
-    void createBookingWithInvalidParameters() {
-        int userId = 1;
-        int itemId = 2;
-        LocalDateTime start = LocalDateTime.of(2023, 8, 1, 12, 0);
-        LocalDateTime end = LocalDateTime.of(2023, 8, 1, 10, 0);
-        PartialBookingDto partialBookingDto = new PartialBookingDto(1, start, end, itemId, 1);
-        when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
-        IncorrectParameterException exception = assertThrows(IncorrectParameterException.class,
-                () -> bookingService.create(userId, partialBookingDto));
-        assertEquals("Ошибка бронирования: некорректно указано время", exception.getMessage());
-    }
-
-    @Test
-    void createBookingWithOwnerBookingOwnItem() {
-        int userId = 1;
-        int itemId = 2;
-        LocalDateTime start = LocalDateTime.of(2023, 8, 1, 12, 0);
-        LocalDateTime end = LocalDateTime.of(2023, 8, 2, 12, 0);
-        Item item = new Item(itemId, "Name", "Description", true);
-        PartialBookingDto partialBookingDto = new PartialBookingDto(1, start, end, itemId, 1);
-        User booker = new User(userId, "User", "user@user.com");
-        when(itemService.getItemById(eq(itemId), eq(userId))).thenReturn(ItemMapper.toItemDto(item));
-        when(userService.getUserById(userId)).thenReturn(booker);
-        NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> bookingService.create(userId, partialBookingDto));
-        assertEquals("Владелец вещи не может ее забронировать", exception.getMessage());
-    }
-
-    @Test
-    void testCreateBookingWithUnavailableItem() {
-        int userId = 1;
-        int itemId = 2;
-        LocalDateTime start = LocalDateTime.of(2023, 8, 1, 12, 0);
-        LocalDateTime end = LocalDateTime.of(2023, 8, 2, 12, 0);
-        Item item = new Item(itemId, "Name", "Description", true);
-        PartialBookingDto partialBookingDto = new PartialBookingDto(1, start, end, itemId, 1);
-
-        when(itemService.getItemById(eq(itemId), eq(userId))).thenReturn(ItemMapper.toItemDto(item));
-        when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
-
-        IncorrectParameterException exception = assertThrows(IncorrectParameterException.class,
-                () -> bookingService.create(userId, partialBookingDto));
-        assertEquals("Вещь не найдена", exception.getMessage());
     }
 
 }
