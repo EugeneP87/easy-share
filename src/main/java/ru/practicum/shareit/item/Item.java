@@ -2,9 +2,10 @@ package ru.practicum.shareit.item;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import ru.practicum.shareit.booking.dto.PartialBookingDto;
 import ru.practicum.shareit.comment.dto.CommentDto;
+import ru.practicum.shareit.request.ItemRequest;
 
 import javax.persistence.*;
 import java.util.List;
@@ -24,7 +25,7 @@ import java.util.List;
 @Entity
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
+@RequiredArgsConstructor
 @Table(name = "items")
 public class Item {
 
@@ -45,12 +46,18 @@ public class Item {
     private PartialBookingDto nextBooking;
     @Transient
     private List<CommentDto> comments;
+    @ManyToOne
+    @JoinColumn(name = "request_id")
+    private ItemRequest request;
 
     public Item(int id, String name, String description, Boolean available) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.available = available;
+    }
+
+    public Item(int id, String name, String description, boolean available, int ownerId, ItemRequest itemRequest) {
     }
 
 }

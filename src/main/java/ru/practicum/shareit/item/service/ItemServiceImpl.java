@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
@@ -18,6 +19,8 @@ import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.service.UserServiceImpl;
 
@@ -33,16 +36,24 @@ import java.util.stream.Stream;
 @AllArgsConstructor
 public class ItemServiceImpl {
 
-    private final UserServiceImpl userServiceImpl;
-    private final ItemRepository itemRepository;
-    private final CommentRepository commentRepository;
     private final BookingRepository bookingRepository;
+    private final CommentRepository commentRepository;
+    private final ItemRepository itemRepository;
+    private final ItemRequestRepository itemRequestRepository;
+    private final UserServiceImpl userServiceImpl;
 
     @Transactional
     public ItemDto create(int userId, ItemDto itemDto) {
-        userServiceImpl.getUserById(userId);
+        User user = userServiceImpl.getUserById(userId);
         Item item = ItemMapper.toItem(itemDto);
-        item.setOwnerId(userId);
+        ItemRequest itemRequest;
+        if (itemDto.getRequestId() != null) {
+            itemRequest = itemRequestRepository.findById(itemDto.getRequestId()).orElse(null);
+        } else {
+            itemRequest = null;
+        }
+        item.setOwnerId(user.getId());
+        item.setRequest(itemRequest);
         return ItemMapper.toItemDto(itemRepository.save(item));
     }
 
@@ -50,6 +61,9 @@ public class ItemServiceImpl {
     public ItemDto update(int itemId, int userId, ItemDto itemDto) {
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException("Вещь не найдена"));
         userServiceImpl.getUserById(userId);
+        if (item.getOwnerId() == null) {
+            throw new NotFoundException("ID владельца вещи отсутствует");
+        }
         if (!item.getOwnerId().equals(userId)) {
             throw new NotFoundException("Пользователь не является владельцем вещи");
         }
@@ -84,8 +98,9 @@ public class ItemServiceImpl {
     }
 
     @Transactional
-    public List<ItemDto> findAllUserItems(int userId) {
-        List<ItemDto> item = itemRepository.findAllByOwnerId(userId).stream()
+    public List<ItemDto> findAllUserItems(int userId, int from, int size) {
+        PageRequest pages = PageRequest.of(from / size, size);
+        List<ItemDto> item = itemRepository.findAllByOwnerId(userId, pages).stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
         return item.stream()
@@ -123,11 +138,12 @@ public class ItemServiceImpl {
     }
 
     @Transactional
-    public List<ItemDto> search(String text) {
+    public List<ItemDto> search(String text, int from, int size) {
         if (text.isEmpty() || text.isBlank()) {
             return new ArrayList<>();
         }
-        return itemRepository.getAvailableItems(text.toLowerCase()).stream()
+        PageRequest pages = PageRequest.of(from / size, size);
+        return itemRepository.getAvailableItems(text.toLowerCase(), pages).stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
     }

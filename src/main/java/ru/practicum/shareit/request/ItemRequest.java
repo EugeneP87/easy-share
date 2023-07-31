@@ -2,11 +2,11 @@ package ru.practicum.shareit.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * Класс ItemRequest имеет следующие поля:
@@ -20,19 +20,22 @@ import java.time.LocalDate;
 @Entity
 @Data
 @AllArgsConstructor
-@RequiredArgsConstructor
+@NoArgsConstructor
 @Table(name = "requests")
 public class ItemRequest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @Column(name = "description")
+    @Column(name = "description", nullable = false)
     private String description;
     @ManyToOne()
-    @JoinColumn(name = "requestor_id")
+    @JoinColumn(name = "requestor_id", nullable = false)
     private User requestor;
     @Column(name = "created_time")
-    private LocalDate created;
+    private LocalDateTime created;
+
+    public ItemRequest(int id, String description, User requestor) {
+    }
 
 }
