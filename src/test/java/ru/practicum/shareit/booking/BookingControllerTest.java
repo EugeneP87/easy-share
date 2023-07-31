@@ -36,7 +36,7 @@ class BookingControllerTest {
     private BookingServiceImpl bookingServiceImpl;
 
     @Test
-    void createBooking() throws Exception {
+    void createBookingTest() throws Exception {
         BookingDto bookingDto = new BookingDto();
         PartialBookingDto partialBookingDto = new PartialBookingDto();
         partialBookingDto.setStart(LocalDateTime.now().plusDays(1));
@@ -56,7 +56,7 @@ class BookingControllerTest {
     }
 
     @Test
-    void updateBooking() throws Exception {
+    void updateBookingTest() throws Exception {
         BookingDto bookingDto = new BookingDto();
         when(bookingServiceImpl.updateBooking(anyInt(), anyInt(), anyBoolean())).thenReturn(bookingDto);
         String response = mockMvc.perform(patch("/bookings/{bookingId}", 1)
@@ -73,7 +73,7 @@ class BookingControllerTest {
     }
 
     @Test
-    void findAllBookingsByUserId() throws Exception {
+    void findAllBookingsByUserIdTest() throws Exception {
         List<BookingDto> bookingDtoList = new ArrayList<>();
         when(bookingServiceImpl.findAllBookingsByUserId(anyInt(), anyString(), anyInt(), anyInt()))
                 .thenReturn(bookingDtoList);
@@ -95,7 +95,7 @@ class BookingControllerTest {
     }
 
     @Test
-    void findAllBookingsByOwnerId() throws Exception {
+    void findAllBookingsByOwnerIdTest() throws Exception {
         List<BookingDto> bookingDtoList = new ArrayList<>();
         when(bookingServiceImpl.findAllBookingsByOwnerId(anyString(), anyInt(), anyInt(), anyInt()))
                 .thenReturn(bookingDtoList);
@@ -117,7 +117,7 @@ class BookingControllerTest {
     }
 
     @Test
-    void findBookingById() throws Exception {
+    void findBookingByIdTest() throws Exception {
         BookingDto bookingDto = new BookingDto();
         when(bookingServiceImpl.findBookingById(anyInt(), anyInt())).thenReturn(bookingDto);
         String response = mockMvc.perform(get("/bookings/{bookingId}", 1)

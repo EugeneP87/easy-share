@@ -41,14 +41,14 @@ class ItemRequestServiceImplTest {
     private Item item;
 
     @BeforeEach
-    void setUp() {
+    void setUpTest() {
         user = new User(1, "User", "user@user.com");
         item = new Item(1, "Item", "Description", true, 1, itemRequest);
         itemRequest = new ItemRequest(1, "Request", user);
     }
 
     @Test
-    void createItemRequest() {
+    void createItemRequestTest() {
         when(userService.getUserById(anyInt())).thenReturn(user);
         when(itemRequestRepository.save(any(ItemRequest.class))).thenReturn(itemRequest);
         ItemRequestDto itemRequestDto = new ItemRequestDto();
@@ -59,7 +59,7 @@ class ItemRequestServiceImplTest {
     }
 
     @Test
-    void getItemRequestById() {
+    void getItemRequestByIdTest() {
         when(userService.getUserById(1)).thenReturn(user);
         when(itemRequestRepository.findById(1)).thenReturn(Optional.of(itemRequest));
         when(itemRepository.findAllByRequestId(itemRequest.getId())).thenReturn(Collections.singletonList(item));
@@ -72,7 +72,7 @@ class ItemRequestServiceImplTest {
     }
 
     @Test
-    void getItemRequestByOwnerId() {
+    void getItemRequestByOwnerIdTest() {
         when(userService.getUserById(1)).thenReturn(user);
         when(itemRequestRepository.findAllByRequestorId(1)).thenReturn(Collections.singletonList(itemRequest));
         when(itemRepository.findAllByRequestIdIn(anyList())).thenReturn(Collections.emptyList());
@@ -87,7 +87,7 @@ class ItemRequestServiceImplTest {
     }
 
     @Test
-    void findAllItemRequests() {
+    void findAllItemRequestsTest() {
         when(userService.getUserById(anyInt())).thenReturn(user);
         when(itemRequestRepository.findAllByRequestorIdNot(1, PageRequest.of(0, 20)))
                 .thenReturn(new ArrayList<>());

@@ -50,7 +50,7 @@ public class BookingServiceImplTest {
     private BookingRepository bookingRepository;
 
     @BeforeEach
-    public void setUp() {
+    public void setUpTest() {
         userService = Mockito.mock(UserServiceImpl.class);
         bookingMapper = Mockito.mock(BookingMapper.class);
         bookingRepository = Mockito.mock(BookingRepository.class);
@@ -58,7 +58,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void findBookingById() {
+    public void findBookingByIdTest() {
         int userId = 1;
         int bookingId = 100;
         User booker = new User();
@@ -74,7 +74,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void findBookingById_NotFound() {
+    public void findBookingByIdNotFoundTest() {
         int userId = 1;
         int bookingId = 100;
         when(bookingRepository.findById(bookingId)).thenReturn(Optional.empty());
@@ -83,7 +83,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void findBookingById_NotOwner() {
+    public void findBookingByIdNotOwnerTest() {
         int userId = 1;
         int bookingId = 100;
         User booker = new User();
@@ -96,7 +96,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void toBookingDto() {
+    public void toBookingDtoTest() {
         int id = 1;
         LocalDateTime start = LocalDateTime.of(2023, 7, 31, 12, 0);
         LocalDateTime end = LocalDateTime.of(2023, 8, 1, 12, 0);
@@ -114,7 +114,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void toPartialBookingDto() {
+    public void toPartialBookingDtoTest() {
         int id = 1;
         LocalDateTime start = LocalDateTime.of(2023, 7, 31, 12, 0);
         LocalDateTime end = LocalDateTime.of(2023, 8, 1, 12, 0);
@@ -130,7 +130,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void toBooking() {
+    public void toBookingTest() {
         int id = 1;
         LocalDateTime start = LocalDateTime.of(2023, 7, 31, 12, 0);
         LocalDateTime end = LocalDateTime.of(2023, 8, 1, 12, 0);
@@ -148,7 +148,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void toBookingDtoList() {
+    public void toBookingDtoListTest() {
         int id1 = 1;
         LocalDateTime start1 = LocalDateTime.of(2023, 7, 31, 12, 0);
         LocalDateTime end1 = LocalDateTime.of(2023, 8, 1, 12, 0);
@@ -181,34 +181,34 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void bookingItemRelationship() {
+    public void bookingItemRelationshipTest() {
         Item item = mock(Item.class);
         Booking booking = new Booking(LocalDateTime.now(), LocalDateTime.now().plusHours(1), item, null, Status.WAITING);
         assertEquals(item, booking.getItem());
     }
 
     @Test
-    public void bookingUserRelationship() {
+    public void bookingUserRelationshipTest() {
         User user = mock(User.class);
         Booking booking = new Booking(LocalDateTime.now(), LocalDateTime.now().plusHours(1), null, user, Status.WAITING);
         assertEquals(user, booking.getBooker());
     }
 
     @Test
-    public void bookingStatus() {
+    public void bookingStatusTest() {
         Status status = Status.APPROVED;
         Booking booking = new Booking(LocalDateTime.now(), LocalDateTime.now().plusHours(1), null, null, status);
         assertEquals(status, booking.getStatus());
     }
 
     @Test
-    public void enumValues() {
+    public void enumValuesTest() {
         assertEquals(6, State.values().length);
         assertArrayEquals(new State[]{State.ALL, State.CURRENT, State.PAST, State.FUTURE, State.WAITING, State.REJECTED}, State.values());
     }
 
     @Test
-    public void enumValue() {
+    public void enumValueTest() {
         assertEquals(State.ALL, State.valueOf("ALL"));
         assertEquals(State.CURRENT, State.valueOf("CURRENT"));
         assertEquals(State.PAST, State.valueOf("PAST"));
@@ -218,12 +218,12 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void invalidEnumValue() {
+    public void invalidEnumValueTest() {
         assertThrows(IllegalArgumentException.class, () -> State.valueOf("INVALID_STATE"));
     }
 
     @Test
-    public void findAllBookingsByOwnerIdAll() {
+    public void findAllBookingsByOwnerIdAllTest() {
         int ownerId = 1;
         int from = 0;
         int size = 10;
@@ -239,7 +239,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void findAllBookingsByOwnerIdUnknownState() {
+    public void findAllBookingsByOwnerIdUnknownStateTest() {
         int ownerId = 1;
         int from = 0;
         int size = 10;
@@ -252,12 +252,12 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void findAllBookingsByUserIdAllStateAll() {
+    public void findAllBookingsByUserIdAllStateAllTest() {
         int userId = 1;
         String state = "ALL";
         int from = 0;
         int size = 10;
-        List<Booking> bookings = createBookingList(userId, 5);
+        List<Booking> bookings = createBookingListTest(userId, 5);
         when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
         when(bookingRepository.findByBookerIdOrderByStartDesc(eq(userId), any(PageRequest.class))).thenReturn(bookings);
         List<BookingDto> result = bookingService.findAllBookingsByUserId(userId, state, from, size);
@@ -265,12 +265,12 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void findAllBookingsByUserIdAllStateCurrent() {
+    public void findAllBookingsByUserIdAllStateCurrentTest() {
         int userId = 1;
         String state = "CURRENT";
         int from = 0;
         int size = 10;
-        List<Booking> bookings = createBookingList(userId, 0);
+        List<Booking> bookings = createBookingListTest(userId, 0);
         when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
         lenient().when(bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(
                 eq(userId),
@@ -283,12 +283,12 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void findAllBookingsByUserIdAllStatePast() {
+    public void findAllBookingsByUserIdAllStatePastTest() {
         int userId = 1;
         String state = "PAST";
         int from = 0;
         int size = 10;
-        List<Booking> bookings = createBookingList(userId, 0);
+        List<Booking> bookings = createBookingListTest(userId, 0);
         when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
         lenient().when(bookingRepository.findByBookerIdAndEndIsBeforeOrderByStartDesc(
                 eq(userId),
@@ -300,12 +300,12 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void findAllBookingsByUserIdAllStateFuture() {
+    public void findAllBookingsByUserIdAllStateFutureTest() {
         int userId = 1;
         String state = "FUTURE";
         int from = 0;
         int size = 10;
-        List<Booking> bookings = createBookingList(userId, 0);
+        List<Booking> bookings = createBookingListTest(userId, 0);
         when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
         lenient().when(bookingRepository.findAllByBookerIdAndStartIsAfterAndEndIsAfterOrderByStartDesc(
                 eq(userId),
@@ -318,12 +318,12 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void findAllBookingsByUserIdAllStateWaiting() {
+    public void findAllBookingsByUserIdAllStateWaitingTest() {
         int userId = 1;
         String state = "WAITING";
         int from = 0;
         int size = 10;
-        List<Booking> bookings = createBookingList(userId, 0);
+        List<Booking> bookings = createBookingListTest(userId, 0);
         when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
         lenient().when(bookingRepository.findByBookerIdAndStatusOrderByStartDesc(
                 eq(userId),
@@ -335,12 +335,12 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void findAllBookingsByUserIdAllStateRejected() {
+    public void findAllBookingsByUserIdAllStateRejectedTest() {
         int userId = 1;
         String state = "REJECTED";
         int from = 0;
         int size = 10;
-        List<Booking> bookings = createBookingList(userId, 0);
+        List<Booking> bookings = createBookingListTest(userId, 0);
         when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
         lenient().when(bookingRepository.findByBookerIdAndStatusOrderByStartDesc(
                 eq(userId),
@@ -352,12 +352,12 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void findAllBookingsByOwnerIdAllStateAll() {
+    public void findAllBookingsByOwnerIdAllStateAllTest() {
         int userId = 1;
         String state = "ALL";
         int from = 0;
         int size = 10;
-        List<Booking> bookings = createBookingList(userId, 5);
+        List<Booking> bookings = createBookingListTest(userId, 5);
         when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
         when(bookingRepository.findAllByItemOwnerIdOrderByStartDesc(eq(userId), any(PageRequest.class))).thenReturn(bookings);
         List<BookingDto> result = bookingService.findAllBookingsByOwnerId(state, userId, from, size);
@@ -365,12 +365,12 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void findAllBookingsByOwnerIdAllStateCurrent() {
+    public void findAllBookingsByOwnerIdAllStateCurrentTest() {
         int userId = 1;
         String state = "CURRENT";
         int from = 0;
         int size = 10;
-        List<Booking> bookings = createBookingList(userId, 0);
+        List<Booking> bookings = createBookingListTest(userId, 0);
         when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
         lenient().when(bookingRepository.findByItemOwnerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(
                 eq(userId),
@@ -383,12 +383,12 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void findAllBookingsByOwnerIdAllStatePast() {
+    public void findAllBookingsByOwnerIdAllStatePastTest() {
         int userId = 1;
         String state = "PAST";
         int from = 0;
         int size = 10;
-        List<Booking> bookings = createBookingList(userId, 0);
+        List<Booking> bookings = createBookingListTest(userId, 0);
         when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
         lenient().when(bookingRepository.findByItemOwnerIdAndEndIsBeforeOrderByStartDesc(
                 eq(userId),
@@ -400,12 +400,12 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void findAllBookingsByOwnerIdAllStateFuture() {
+    public void findAllBookingsByOwnerIdAllStateFutureTest() {
         int userId = 1;
         String state = "FUTURE";
         int from = 0;
         int size = 10;
-        List<Booking> bookings = createBookingList(userId, 0);
+        List<Booking> bookings = createBookingListTest(userId, 0);
         when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
         lenient().when(bookingRepository.findByItemOwnerIdAndStartIsAfterAndEndIsAfterOrderByStartDesc(
                 eq(userId),
@@ -418,12 +418,12 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void findAllBookingsByOwnerIdAllStateWaiting() {
+    public void findAllBookingsByOwnerIdAllStateWaitingTest() {
         int userId = 1;
         String state = "WAITING";
         int from = 0;
         int size = 10;
-        List<Booking> bookings = createBookingList(userId, 0);
+        List<Booking> bookings = createBookingListTest(userId, 0);
         when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
         lenient().when(bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(
                 eq(userId),
@@ -435,12 +435,12 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void findAllBookingsByOwnerIdAllStateRejected() {
+    public void findAllBookingsByOwnerIdAllStateRejectedTest() {
         int userId = 1;
         String state = "REJECTED";
         int from = 0;
         int size = 10;
-        List<Booking> bookings = createBookingList(userId, 0);
+        List<Booking> bookings = createBookingListTest(userId, 0);
         when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
         lenient().when(bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(
                 eq(userId),
@@ -452,7 +452,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void findAllBookingsByUserIdUnknownState() {
+    public void findAllBookingsByUserIdUnknownStateTest() {
         int userId = 1;
         String state = "UNKNOWN";
         int from = 0;
@@ -463,7 +463,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void findAllBookingsByInvalidUserId() {
+    public void findAllBookingsByInvalidUserIdTest() {
         int userId = 999;
         String state = "ALL";
         int from = 0;
@@ -473,7 +473,7 @@ public class BookingServiceImplTest {
                 () -> bookingService.findAllBookingsByUserId(userId, state, from, size));
     }
 
-    private List<Booking> createBookingList(int userId, int numBookings) {
+    private List<Booking> createBookingListTest(int userId, int numBookings) {
         List<Booking> bookings = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();
         for (int i = 0; i < numBookings; i++) {
@@ -485,7 +485,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void createBookingSuccess() {
+    void createBookingSuccessTest() {
         int userId = 1;
         int itemId = 2;
         LocalDateTime start = LocalDateTime.of(2023, 8, 1, 12, 0);

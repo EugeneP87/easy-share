@@ -35,7 +35,7 @@ class UserControllerTest {
     private final UserDto userDto = new UserDto(1, "UserDto", "userDto@userDto.com");
 
     @Test
-    void create() throws Exception {
+    void createTest() throws Exception {
         when(userServiceImpl.create(any())).thenReturn(user);
         String response = mockMvc.perform(post("/users")
                         .content(mapper.writeValueAsString(user))
@@ -51,7 +51,7 @@ class UserControllerTest {
     }
 
     @Test
-    void createUserWrongEmail() throws Exception {
+    void createUserWrongEmailTest() throws Exception {
         User incorrectEmail = new User(1, "User", "useruser.com");
         mockMvc.perform(post("/users")
                         .content(mapper.writeValueAsString(incorrectEmail))
@@ -64,7 +64,7 @@ class UserControllerTest {
     }
 
     @Test
-    void update() throws Exception {
+    void updateTest() throws Exception {
         when(userServiceImpl.update(anyInt(), any())).thenReturn(userDto);
         String response = mockMvc.perform(patch("/users/{userId}", 1)
                         .content(mapper.writeValueAsString(userDto))
@@ -80,7 +80,7 @@ class UserControllerTest {
     }
 
     @Test
-    void deleteUserById() throws Exception {
+    void deleteUserByIdTest() throws Exception {
         mockMvc.perform(delete("/users/{userId}", 1))
                 .andDo(print())
                 .andExpect(status().isOk());
@@ -88,7 +88,7 @@ class UserControllerTest {
     }
 
     @Test
-    void findAllUsers() throws Exception {
+    void findAllUsersTest() throws Exception {
         when(userServiceImpl.findAllUsers()).thenReturn(List.of(user));
 
         String response = mockMvc.perform(get("/users"))
@@ -103,7 +103,7 @@ class UserControllerTest {
     }
 
     @Test
-    void getUserById() throws Exception {
+    void getUserByIdTest() throws Exception {
         when(userServiceImpl.getUserById(anyInt())).thenReturn(user);
         String response = mockMvc.perform(get("/users/{userId}", 1)
                         .content(mapper.writeValueAsString(user))

@@ -51,7 +51,7 @@ public class ItemServiceImplTest {
     private ItemServiceImpl itemService;
 
     @BeforeEach
-    public void setUp() {
+    public void setUpTest() {
         itemRepository = mock(ItemRepository.class);
         userServiceImpl = mock(UserServiceImpl.class);
         itemService = new ItemServiceImpl(bookingRepository, commentRepository, itemRepository, itemRequestRepository, userServiceImpl);
@@ -59,7 +59,7 @@ public class ItemServiceImplTest {
 
 
     @Test
-    public void createItem() {
+    public void createItemTest() {
         int userId = 1;
         ItemDto itemDto = new ItemDto(1, "Item1", "Description1", true, 1);
         User user = new User(userId, "User", "user@user.com");
@@ -74,14 +74,14 @@ public class ItemServiceImplTest {
     }
 
     @Test
-    public void deleteItem() {
+    public void deleteItemTest() {
         int itemId = 1;
         itemService.deleteById(itemId);
         verify(itemRepository, times(1)).deleteById(itemId);
     }
 
     @Test
-    public void getItemById() {
+    public void getItemByIdTest() {
         int itemId = 1;
         int userId = 1;
         Item item = new Item(1, "Item1", "Description1", true);
@@ -93,7 +93,7 @@ public class ItemServiceImplTest {
     }
 
     @Test
-    public void findAllUserItems() {
+    public void findAllUserItemsTest() {
         int userId = 1;
         int from = 0;
         int size = 10;
@@ -114,7 +114,7 @@ public class ItemServiceImplTest {
     }
 
     @Test
-    public void searchItems() {
+    public void searchItemsTest() {
         int from = 0;
         int size = 20;
         String searchText = "Item";
@@ -130,7 +130,7 @@ public class ItemServiceImplTest {
     }
 
     @Test
-    public void getOwnerId() {
+    public void getOwnerIdTest() {
         int itemId = 1;
         int ownerId = 1;
         Item item = new Item(1, "Item1", "Description1", true);
@@ -142,7 +142,7 @@ public class ItemServiceImplTest {
     }
 
     @Test
-    public void updateBooking() {
+    public void updateBookingTest() {
         BookingRepository bookingRepository = Mockito.mock(BookingRepository.class);
         ItemServiceImpl itemService = new ItemServiceImpl(bookingRepository, commentRepository, itemRepository, itemRequestRepository, userServiceImpl);
         int itemId = 1;
@@ -163,7 +163,7 @@ public class ItemServiceImplTest {
     }
 
     @Test
-    void addCommentTest() {
+    void addCommentTestTest() {
         Item item = new Item(1, "Item1", "Description1", true);
         UserDto userDto = new UserDto(1, "User", "user@user.com");
         List<Booking> bookingList = List.of(new Booking(), new Booking());
@@ -187,7 +187,7 @@ public class ItemServiceImplTest {
     }
 
     @Test
-    public void searchWithEmptyText() {
+    public void searchWithEmptyTextTest() {
         ItemRepository itemRepositoryMock = mock(ItemRepository.class);
         ItemServiceImpl itemService = new ItemServiceImpl(bookingRepository, commentRepository, itemRepository, itemRequestRepository, userServiceImpl);
         List<ItemDto> result = itemService.search("", 0, 10);
@@ -196,7 +196,7 @@ public class ItemServiceImplTest {
     }
 
     @Test
-    void updateItem() {
+    void updateItemTest() {
         User user = new User(1, "User", "user@user.com");
         Item item = new Item(1, "User", "Description", true, 1,
                 new ItemRequest(2,
@@ -214,7 +214,7 @@ public class ItemServiceImplTest {
     }
 
     @Test
-    void updateItemNotOwner() {
+    void updateItemNotOwnerTest() {
         int itemId = 1;
         int userId = 1;
         Item existingItem = new Item(itemId, "User", "Description", true, 2,
@@ -232,7 +232,7 @@ public class ItemServiceImplTest {
     }
 
     @Test
-    public void testUpdateItemWhenItemNotFound() {
+    public void testUpdateItemWhenItemNotFoundTest() {
         int itemId = 1;
         int userId = 1;
         ItemDto itemDto = new ItemDto(itemId, "Name", "Description", true, userId);
@@ -245,7 +245,7 @@ public class ItemServiceImplTest {
     }
 
     @Test
-    public void testUpdateItemWhenNoOwnerId() {
+    public void testUpdateItemWhenNoOwnerIdTest() {
         int itemId = 1;
         int userId = 1;
         Item existingItem = new Item(itemId, "User", "Description", true, 2,

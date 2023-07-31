@@ -32,12 +32,12 @@ public class ExceptionTest {
     private ValidationException validationException;
 
     @BeforeEach
-    public void setUp() {
+    public void setUpTest() {
         MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    public void handleNotFoundException() {
+    public void handleNotFoundExceptionTest() {
         String errorMessage = String.valueOf(HttpStatus.NOT_FOUND);
         when(notFoundException.getMessage()).thenReturn(errorMessage);
         ErrorResponse response = errorHandler.handleNotFoundException(notFoundException);
@@ -46,7 +46,7 @@ public class ExceptionTest {
     }
 
     @Test
-    public void handleIncorrectParameterException() {
+    public void handleIncorrectParameterExceptionTest() {
         String errorMessage = String.valueOf(HttpStatus.BAD_REQUEST);
         when(incorrectParameterException.getMessage()).thenReturn(errorMessage);
         ErrorResponse response = errorHandler.handleIncorrectParameterException(incorrectParameterException);
@@ -55,7 +55,7 @@ public class ExceptionTest {
     }
 
     @Test
-    public void handleAlreadyExistException() {
+    public void handleAlreadyExistExceptionTest() {
         String errorMessage = String.valueOf(HttpStatus.BAD_REQUEST);
         when(alreadyExistException.getMessage()).thenReturn(errorMessage);
         ErrorResponse response = errorHandler.handleAlreadyExistException(alreadyExistException);
@@ -64,14 +64,14 @@ public class ExceptionTest {
     }
 
     @Test
-    public void handleThrowable() {
+    public void handleThrowableTest() {
         ErrorResponse response = errorHandler.handleThrowable(new Throwable());
         assertEquals(String.valueOf("Произошла непредвиденная ошибка."), response.getError());
         assertEquals("Произошла непредвиденная ошибка.", response.getError());
     }
 
     @Test
-    public void errorResponseDefaultConstructor() {
+    public void errorResponseDefaultConstructorTest() {
         ErrorResponse response = new ErrorResponse("Error message");
         assertEquals("Error message", response.getError());
     }
@@ -84,7 +84,7 @@ public class ExceptionTest {
     }
 
     @Test
-    public void constructorWithMessage() {
+    public void constructorWithMessageTest() {
         String errorMessage = "Invalid parameter";
         IncorrectParameterException exception = assertThrows(IncorrectParameterException.class, () -> {
             throw new IncorrectParameterException(errorMessage);
@@ -93,7 +93,7 @@ public class ExceptionTest {
     }
 
     @Test
-    public void testConstructorWithMessage() {
+    public void testConstructorWithMessageTest() {
         String message = "This is a validation error.";
         ValidationException exception = new ValidationException(message);
         assertEquals(message, exception.getMessage());

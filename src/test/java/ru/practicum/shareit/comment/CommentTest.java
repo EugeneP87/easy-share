@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class CommentTest {
 
     @Test
-    public void toCommentDto() {
+    public void toCommentDtoTest() {
         int id = 1;
         String text = "Comment";
         LocalDateTime created = LocalDateTime.now();
@@ -36,7 +36,7 @@ public class CommentTest {
     }
 
     @Test
-    public void toComment() {
+    public void toCommentTest() {
         int id = 1;
         String text = "Comment";
         LocalDateTime created = LocalDateTime.now();
@@ -50,7 +50,7 @@ public class CommentTest {
     }
 
     @Test
-    public void toDtoList() {
+    public void toDtoListTest() {
         int id1 = 1;
         String text1 = "Comment 1";
         LocalDateTime created1 = LocalDateTime.now();
@@ -79,7 +79,7 @@ public class CommentTest {
     }
 
     @Test
-    public void commentConstructor() {
+    public void commentConstructorTest() {
         int id = 1;
         String text = "Comment";
         LocalDateTime created = LocalDateTime.now();
@@ -94,7 +94,7 @@ public class CommentTest {
     }
 
     @Test
-    public void commentConstructorWithIdAndText() {
+    public void commentConstructorWithIdAndTextTest() {
         int id = 1;
         String text = "Comment";
         LocalDateTime created = LocalDateTime.now();

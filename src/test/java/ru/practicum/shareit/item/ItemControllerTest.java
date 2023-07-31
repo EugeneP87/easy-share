@@ -35,7 +35,7 @@ class ItemControllerTest {
     private ItemServiceImpl itemServiceImpl;
 
     @Test
-    void createItem() throws Exception {
+    void createItemTest() throws Exception {
         ItemDto itemDto = new ItemDto();
         itemDto.setName("Item");
         itemDto.setDescription("Description");
@@ -56,7 +56,7 @@ class ItemControllerTest {
     }
 
     @Test
-    void updateItem() throws Exception {
+    void updateItemTest() throws Exception {
         ItemDto itemDto = new ItemDto();
         when(itemServiceImpl.update(anyInt(), anyInt(), any(ItemDto.class))).thenReturn(itemDto);
         String response = mockMvc.perform(patch("/items/{itemId}", 1)
@@ -74,7 +74,7 @@ class ItemControllerTest {
     }
 
     @Test
-    void deleteItem() throws Exception {
+    void deleteItemTest() throws Exception {
         mockMvc.perform(delete("/items/{itemId}", 1))
                 .andDo(print())
                 .andExpect(status().isOk());
@@ -82,7 +82,7 @@ class ItemControllerTest {
     }
 
     @Test
-    void getItemById() throws Exception {
+    void getItemByIdTest() throws Exception {
         ItemDto itemDto = new ItemDto();
         when(itemServiceImpl.getItemById(anyInt(), anyInt())).thenReturn(itemDto);
         String response = mockMvc.perform(get("/items/{itemId}", 1)
@@ -99,7 +99,7 @@ class ItemControllerTest {
     }
 
     @Test
-    void findAllUserItems() throws Exception {
+    void findAllUserItemsTest() throws Exception {
         ItemDto itemDto = new ItemDto();
         when(itemServiceImpl.findAllUserItems(anyInt(), anyInt(), anyInt()))
                 .thenReturn(Collections.singletonList(itemDto));
@@ -119,7 +119,7 @@ class ItemControllerTest {
     }
 
     @Test
-    void searchItems() throws Exception {
+    void searchItemsTest() throws Exception {
         ItemDto itemDto = new ItemDto();
         when(itemServiceImpl.search(anyString(), anyInt(), anyInt())).thenReturn(Collections.singletonList(itemDto));
         String response = mockMvc.perform(get("/items/search")
@@ -139,7 +139,7 @@ class ItemControllerTest {
     }
 
     @Test
-    void addCommentToItem() throws Exception {
+    void addCommentToItemTest() throws Exception {
         CommentDto commentDto = new CommentDto();
         commentDto.setText("Comment");
         when(itemServiceImpl.addComment(anyInt(), anyInt(), any(CommentDto.class))).thenReturn(commentDto);

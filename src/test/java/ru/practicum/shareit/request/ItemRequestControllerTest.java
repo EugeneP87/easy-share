@@ -37,7 +37,7 @@ class ItemRequestControllerTest {
     private ItemRequestServiceImpl itemRequestServiceImpl;
 
     @Test
-    void createItemRequest() throws Exception {
+    void createItemRequestTest() throws Exception {
         LocalDateTime createdDateTime = LocalDateTime.of(2023, 7, 30, 12, 0, 0);
         List<ItemDto> itemDtos = List.of(
                 new ItemDto(1, "Item 1", "Description 1", true, 1),
@@ -61,7 +61,7 @@ class ItemRequestControllerTest {
     }
 
     @Test
-    void getItemRequestById() throws Exception {
+    void getItemRequestByIdTest() throws Exception {
         LocalDateTime createdDateTime = LocalDateTime.of(2023, 7, 30, 12, 0, 0);
         List<ItemDto> itemDtos = List.of(
                 new ItemDto(1, "Item 1", "Description 1", true, 1),
@@ -82,7 +82,7 @@ class ItemRequestControllerTest {
     }
 
     @Test
-    void getItemRequestByOwnerId() throws Exception {
+    void getItemRequestByOwnerIdTest() throws Exception {
         LocalDateTime createdDateTime = LocalDateTime.of(2023, 7, 30, 12, 0, 0);
         List<ItemDto> itemDtos = List.of(
                 new ItemDto(1, "Item 1", "Description 1", true, 1),
@@ -106,7 +106,7 @@ class ItemRequestControllerTest {
     }
 
     @Test
-    void findAllItemRequests() throws Exception {
+    void findAllItemRequestsTest() throws Exception {
         LocalDateTime createdDateTime = LocalDateTime.of(2023, 7, 30, 12, 0, 0);
         List<ItemDto> itemDtos = List.of(
                 new ItemDto(1, "Item 1", "Description 1", true, 1),
@@ -132,7 +132,7 @@ class ItemRequestControllerTest {
     }
 
     @Test
-    void getItemRequestByOwnerId1() throws Exception {
+    void getItemRequestByOwnerIdNewTest() throws Exception {
         LocalDateTime createdDateTime = LocalDateTime.of(2023, 7, 30, 12, 0, 0);
         List<ItemDto> itemDtos = List.of(
                 new ItemDto(1, "Item 1", "Description 1", true, 1),
@@ -156,7 +156,7 @@ class ItemRequestControllerTest {
     }
 
     @Test
-    void findAllItemRequests1() throws Exception {
+    void findAllItemRequestsNewTest() throws Exception {
         LocalDateTime createdDateTime = LocalDateTime.of(2023, 7, 30, 12, 0, 0);
         List<ItemDto> itemDtos = List.of(
                 new ItemDto(1, "Item 1", "Description 1", true, 1),
