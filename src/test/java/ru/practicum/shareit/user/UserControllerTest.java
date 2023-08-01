@@ -35,7 +35,7 @@ class UserControllerTest {
     private final UserDto userDto = new UserDto(1, "UserDto", "userDto@userDto.com");
 
     @Test
-    void createTest() throws Exception {
+    void testCreate() throws Exception {
         when(userServiceImpl.create(any())).thenReturn(user);
         String response = mockMvc.perform(post("/users")
                         .content(mapper.writeValueAsString(user))
@@ -47,11 +47,11 @@ class UserControllerTest {
                 .andReturn()
                 .getResponse()
                 .getContentAsString(Charset.defaultCharset());
-        assertEquals(user, mapper.readValue(response, User.class));
+        assertEquals(user, mapper.readValue(response, User.class), "Ошибка при создании пользователя: объект не соответствует ожидаемому");
     }
 
     @Test
-    void createUserWrongEmailTest() throws Exception {
+    void testCreateUserWrongEmail() throws Exception {
         User incorrectEmail = new User(1, "User", "useruser.com");
         mockMvc.perform(post("/users")
                         .content(mapper.writeValueAsString(incorrectEmail))
@@ -64,7 +64,7 @@ class UserControllerTest {
     }
 
     @Test
-    void updateTest() throws Exception {
+    void testUpdate() throws Exception {
         when(userServiceImpl.update(anyInt(), any())).thenReturn(userDto);
         String response = mockMvc.perform(patch("/users/{userId}", 1)
                         .content(mapper.writeValueAsString(userDto))
@@ -76,11 +76,11 @@ class UserControllerTest {
                 .andReturn()
                 .getResponse()
                 .getContentAsString(Charset.defaultCharset());
-        assertEquals(userDto, mapper.readValue(response, UserDto.class));
+        assertEquals(userDto, mapper.readValue(response, UserDto.class), "Ошибка при обновлении пользователя: объект не соответствует ожидаемому");
     }
 
     @Test
-    void deleteUserByIdTest() throws Exception {
+    void testDeleteUserById() throws Exception {
         mockMvc.perform(delete("/users/{userId}", 1))
                 .andDo(print())
                 .andExpect(status().isOk());
@@ -88,7 +88,7 @@ class UserControllerTest {
     }
 
     @Test
-    void findAllUsersTest() throws Exception {
+    void testFindAllUsers() throws Exception {
         when(userServiceImpl.findAllUsers()).thenReturn(List.of(user));
 
         String response = mockMvc.perform(get("/users"))
@@ -99,11 +99,11 @@ class UserControllerTest {
                 .getContentAsString(Charset.defaultCharset());
         List<User> actualUsers = mapper.readValue(response, new TypeReference<>() {
         });
-        assertEquals(List.of(user), actualUsers);
+        assertEquals(List.of(user), actualUsers, "Ошибка при получении всех пользователей: результат не соответствует ожидаемому");
     }
 
     @Test
-    void getUserByIdTest() throws Exception {
+    void testGetUserById() throws Exception {
         when(userServiceImpl.getUserById(anyInt())).thenReturn(user);
         String response = mockMvc.perform(get("/users/{userId}", 1)
                         .content(mapper.writeValueAsString(user))
@@ -115,7 +115,7 @@ class UserControllerTest {
                 .andReturn()
                 .getResponse()
                 .getContentAsString(Charset.defaultCharset());
-        assertEquals(user, mapper.readValue(response, User.class));
+        assertEquals(user, mapper.readValue(response, User.class), "Ошибка при получении пользователя по ID: объект не соответствует ожидаемому");
     }
 
 }

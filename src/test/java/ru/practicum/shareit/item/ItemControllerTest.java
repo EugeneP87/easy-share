@@ -35,7 +35,7 @@ class ItemControllerTest {
     private ItemServiceImpl itemServiceImpl;
 
     @Test
-    void createItemTest() throws Exception {
+    void testCreateItem() throws Exception {
         ItemDto itemDto = new ItemDto();
         itemDto.setName("Item");
         itemDto.setDescription("Description");
@@ -52,11 +52,11 @@ class ItemControllerTest {
                 .andReturn()
                 .getResponse()
                 .getContentAsString(Charset.defaultCharset());
-        assertEquals(itemDto, mapper.readValue(response, ItemDto.class));
+        assertEquals(itemDto, mapper.readValue(response, ItemDto.class), "Ошибка при создании предмета");
     }
 
     @Test
-    void updateItemTest() throws Exception {
+    void testUpdateItem() throws Exception {
         ItemDto itemDto = new ItemDto();
         when(itemServiceImpl.update(anyInt(), anyInt(), any(ItemDto.class))).thenReturn(itemDto);
         String response = mockMvc.perform(patch("/items/{itemId}", 1)
@@ -70,11 +70,11 @@ class ItemControllerTest {
                 .andReturn()
                 .getResponse()
                 .getContentAsString(Charset.defaultCharset());
-        assertEquals(itemDto, mapper.readValue(response, ItemDto.class));
+        assertEquals(itemDto, mapper.readValue(response, ItemDto.class), "Ошибка при обновлении предмета");
     }
 
     @Test
-    void deleteItemTest() throws Exception {
+    void testDeleteItem() throws Exception {
         mockMvc.perform(delete("/items/{itemId}", 1))
                 .andDo(print())
                 .andExpect(status().isOk());
@@ -82,7 +82,7 @@ class ItemControllerTest {
     }
 
     @Test
-    void getItemByIdTest() throws Exception {
+    void testGetItemById() throws Exception {
         ItemDto itemDto = new ItemDto();
         when(itemServiceImpl.getItemById(anyInt(), anyInt())).thenReturn(itemDto);
         String response = mockMvc.perform(get("/items/{itemId}", 1)
@@ -95,11 +95,11 @@ class ItemControllerTest {
                 .andReturn()
                 .getResponse()
                 .getContentAsString(Charset.defaultCharset());
-        assertEquals(itemDto, mapper.readValue(response, ItemDto.class));
+        assertEquals(itemDto, mapper.readValue(response, ItemDto.class), "Ошибка при получении предмета по ID");
     }
 
     @Test
-    void findAllUserItemsTest() throws Exception {
+    void testFindAllUserItems() throws Exception {
         ItemDto itemDto = new ItemDto();
         when(itemServiceImpl.findAllUserItems(anyInt(), anyInt(), anyInt()))
                 .thenReturn(Collections.singletonList(itemDto));
@@ -115,11 +115,11 @@ class ItemControllerTest {
                 .getContentAsString(Charset.defaultCharset());
         Collection<ItemDto> actualItems = mapper.readValue(response, new TypeReference<>() {
         });
-        assertEquals(Collections.singletonList(itemDto), actualItems);
+        assertEquals(Collections.singletonList(itemDto), actualItems, "Ошибка при поиске всех предметов пользователя");
     }
 
     @Test
-    void searchItemsTest() throws Exception {
+    void testSearchItems() throws Exception {
         ItemDto itemDto = new ItemDto();
         when(itemServiceImpl.search(anyString(), anyInt(), anyInt())).thenReturn(Collections.singletonList(itemDto));
         String response = mockMvc.perform(get("/items/search")
@@ -135,11 +135,11 @@ class ItemControllerTest {
                 .getContentAsString(Charset.defaultCharset());
         Collection<ItemDto> actualItems = mapper.readValue(response, new TypeReference<>() {
         });
-        assertEquals(Collections.singletonList(itemDto), actualItems);
+        assertEquals(Collections.singletonList(itemDto), actualItems, "Ошибка при поиске предметов по тексту");
     }
 
     @Test
-    void addCommentToItemTest() throws Exception {
+    void testAddCommentToItem() throws Exception {
         CommentDto commentDto = new CommentDto();
         commentDto.setText("Comment");
         when(itemServiceImpl.addComment(anyInt(), anyInt(), any(CommentDto.class))).thenReturn(commentDto);
@@ -154,7 +154,7 @@ class ItemControllerTest {
                 .andReturn()
                 .getResponse()
                 .getContentAsString(Charset.defaultCharset());
-        assertEquals(commentDto, mapper.readValue(response, CommentDto.class));
+        assertEquals(commentDto, mapper.readValue(response, CommentDto.class), "Ошибка при добавлении комментария к предмету");
     }
 
 }

@@ -8,7 +8,10 @@ import ru.practicum.shareit.item.dto.ItemDto;
  */
 
 
-public class ItemMapper {
+public final class ItemMapper {
+
+    public ItemMapper() {
+    }
 
     public static ItemDto toItemDto(Item item) {
         return new ItemDto(

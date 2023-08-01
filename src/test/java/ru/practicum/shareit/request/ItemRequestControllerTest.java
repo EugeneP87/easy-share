@@ -37,7 +37,7 @@ class ItemRequestControllerTest {
     private ItemRequestServiceImpl itemRequestServiceImpl;
 
     @Test
-    void createItemRequestTest() throws Exception {
+    void testCreateItemRequest() throws Exception {
         LocalDateTime createdDateTime = LocalDateTime.of(2023, 7, 30, 12, 0, 0);
         List<ItemDto> itemDtos = List.of(
                 new ItemDto(1, "Item 1", "Description 1", true, 1),
@@ -57,11 +57,11 @@ class ItemRequestControllerTest {
                 .andReturn()
                 .getResponse()
                 .getContentAsString(Charset.defaultCharset());
-        assertEquals(expectedResponse, mapper.readValue(response, ItemRequestDto.class));
+        assertEquals(expectedResponse, mapper.readValue(response, ItemRequestDto.class), "Ошибка при создании запроса на предмет: неверный ответ");
     }
 
     @Test
-    void getItemRequestByIdTest() throws Exception {
+    void testGetItemRequestById() throws Exception {
         LocalDateTime createdDateTime = LocalDateTime.of(2023, 7, 30, 12, 0, 0);
         List<ItemDto> itemDtos = List.of(
                 new ItemDto(1, "Item 1", "Description 1", true, 1),
@@ -78,11 +78,11 @@ class ItemRequestControllerTest {
                 .andReturn()
                 .getResponse()
                 .getContentAsString(Charset.defaultCharset());
-        assertEquals(expectedResponse, mapper.readValue(response, ItemRequestDto.class));
+        assertEquals(expectedResponse, mapper.readValue(response, ItemRequestDto.class), "Ошибка при получении запроса на предмет по ID: неверный ответ");
     }
 
     @Test
-    void getItemRequestByOwnerIdTest() throws Exception {
+    void testGetItemRequestByOwnerId() throws Exception {
         LocalDateTime createdDateTime = LocalDateTime.of(2023, 7, 30, 12, 0, 0);
         List<ItemDto> itemDtos = List.of(
                 new ItemDto(1, "Item 1", "Description 1", true, 1),
@@ -102,11 +102,11 @@ class ItemRequestControllerTest {
                 .getContentAsString(Charset.defaultCharset());
         List<ItemRequestDto> actualResponse = mapper.readValue(response, new TypeReference<>() {
         });
-        assertEquals(expectedResponse, actualResponse);
+        assertEquals(expectedResponse, actualResponse, "Ошибка при получении запросов на предмет по ID владельца: неверный ответ");
     }
 
     @Test
-    void findAllItemRequestsTest() throws Exception {
+    void testFindAllItemRequests() throws Exception {
         LocalDateTime createdDateTime = LocalDateTime.of(2023, 7, 30, 12, 0, 0);
         List<ItemDto> itemDtos = List.of(
                 new ItemDto(1, "Item 1", "Description 1", true, 1),
@@ -128,11 +128,11 @@ class ItemRequestControllerTest {
                 .getContentAsString(Charset.defaultCharset());
         List<ItemRequestDto> actualResponse = mapper.readValue(response, new TypeReference<>() {
         });
-        assertEquals(expectedResponse, actualResponse);
+        assertEquals(expectedResponse, actualResponse, "Ошибка при получении всех запросов на предмет: неверный ответ");
     }
 
     @Test
-    void getItemRequestByOwnerIdNewTest() throws Exception {
+    void testGetItemRequestByOwnerIdNew() throws Exception {
         LocalDateTime createdDateTime = LocalDateTime.of(2023, 7, 30, 12, 0, 0);
         List<ItemDto> itemDtos = List.of(
                 new ItemDto(1, "Item 1", "Description 1", true, 1),
@@ -152,11 +152,11 @@ class ItemRequestControllerTest {
                 .getContentAsString(Charset.defaultCharset());
         List<ItemRequestDto> actualResponse = mapper.readValue(response, new TypeReference<>() {
         });
-        assertEquals(expectedResponse, actualResponse);
+        assertEquals(expectedResponse, actualResponse, "Ошибка при получении запросов на предмет по ID владельца: неверный ответ");
     }
 
     @Test
-    void findAllItemRequestsNewTest() throws Exception {
+    void testFindAllItemRequestsNew() throws Exception {
         LocalDateTime createdDateTime = LocalDateTime.of(2023, 7, 30, 12, 0, 0);
         List<ItemDto> itemDtos = List.of(
                 new ItemDto(1, "Item 1", "Description 1", true, 1),
@@ -178,7 +178,7 @@ class ItemRequestControllerTest {
                 .getContentAsString(Charset.defaultCharset());
         List<ItemRequestDto> actualResponse = mapper.readValue(response, new TypeReference<>() {
         });
-        assertEquals(expectedResponse, actualResponse);
+        assertEquals(expectedResponse, actualResponse, "Ошибка при получении всех запросов на предмет: неверный ответ");
     }
 
 }

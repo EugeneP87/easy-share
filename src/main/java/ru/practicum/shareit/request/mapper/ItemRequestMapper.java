@@ -8,14 +8,18 @@ import ru.practicum.shareit.user.User;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class ItemRequestMapper {
+public final class ItemRequestMapper {
+
+    private ItemRequestMapper() {
+    }
 
     public static ItemRequestDto toItemRequestDto(ItemRequest itemRequest, List<ItemDto> items) {
         return new ItemRequestDto(
                 itemRequest.getId(),
                 itemRequest.getDescription(),
                 itemRequest.getCreated(),
-                items);
+                items
+        );
     }
 
     public static ItemRequest toItemRequest(ItemRequestDto itemRequestDto, User user) {
@@ -23,7 +27,7 @@ public class ItemRequestMapper {
                 itemRequestDto.getId(),
                 itemRequestDto.getDescription(),
                 user,
-                LocalDateTime.now());
+                LocalDateTime.now()
+        );
     }
-
 }

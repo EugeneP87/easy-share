@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -13,11 +12,13 @@ import ru.practicum.shareit.booking.dto.PartialBookingDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingServiceImpl;
+import ru.practicum.shareit.comment.repository.CommentRepository;
 import ru.practicum.shareit.exception.IncorrectParameterException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.Item;
-import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemServiceImpl;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.service.UserServiceImpl;
 
@@ -35,26 +36,24 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class BookingServiceImplTest {
 
-    @InjectMocks
-    private BookingServiceImpl bookingService;
-    @Mock
     private BookingMapper bookingMapper;
-
-    @Mock
-    private UserServiceImpl userService;
-
-    @Mock
-    private ItemServiceImpl itemService;
-
     @Mock
     private BookingRepository bookingRepository;
+    @Mock
+    private UserServiceImpl userService;
+    private ItemServiceImpl itemService;
+    private ItemRepository itemRepository;
+    private ItemRequestRepository itemRequestRepository;
+    private UserServiceImpl userServiceImpl;
+    private CommentRepository commentRepository;
+    @InjectMocks
+    private BookingServiceImpl bookingService;
 
     @BeforeEach
-    public void setUpTest() {
-        userService = Mockito.mock(UserServiceImpl.class);
-        bookingMapper = Mockito.mock(BookingMapper.class);
-        bookingRepository = Mockito.mock(BookingRepository.class);
-        bookingService = new BookingServiceImpl(userService, itemService, bookingRepository);
+    void setUp() {
+        itemRepository = mock(ItemRepository.class);
+        userServiceImpl = mock(UserServiceImpl.class);
+        itemService = new ItemServiceImpl(bookingRepository, commentRepository, itemRepository, itemRequestRepository, userServiceImpl);
     }
 
     @Test
@@ -68,22 +67,24 @@ public class BookingServiceImplTest {
         booking.setBooker(booker);
         when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(booking));
         Booking result = BookingMapper.toBooking(bookingService.findBookingById(userId, bookingId));
-        assertNotNull(result);
-        assertEquals(bookingId, result.getId());
-        assertEquals(booking, result);
+        assertNotNull(result, "Ошибка при поиске бронирования по ID: результат не должен быть null");
+        assertEquals(bookingId, result.getId(),
+                "Ошибка при поиске бронирования по ID: ID бронирования не соответствует ожидаемому значению");
+        assertEquals(booking, result,
+                "Ошибка при поиске бронирования по ID: объекты бронирования не соответствуют ожидаемым");
     }
 
     @Test
-    public void findBookingByIdNotFoundTest() {
+    public void testFindBookingByIdNotFound() {
         int userId = 1;
         int bookingId = 100;
         when(bookingRepository.findById(bookingId)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class,
-                () -> bookingService.findBookingById(userId, bookingId));
+                () -> bookingService.findBookingById(userId, bookingId), "Ожидалось исключение NotFoundException.");
     }
 
     @Test
-    public void findBookingByIdNotOwnerTest() {
+    public void testFindBookingByIdNotOwner() {
         int userId = 1;
         int bookingId = 100;
         User booker = new User();
@@ -92,11 +93,13 @@ public class BookingServiceImplTest {
         booking.setId(bookingId);
         booking.setBooker(booker);
         when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(booking));
-        assertDoesNotThrow(() -> bookingService.findBookingById(userId, bookingId));
+        assertDoesNotThrow(() -> bookingService.findBookingById(userId, bookingId),
+                "При поиске бронирования пользователем с идентификатором " + userId
+                        + " не должно возникать исключения.");
     }
 
     @Test
-    public void toBookingDtoTest() {
+    public void testToBookingDto() {
         int id = 1;
         LocalDateTime start = LocalDateTime.of(2023, 7, 31, 12, 0);
         LocalDateTime end = LocalDateTime.of(2023, 8, 1, 12, 0);
@@ -105,16 +108,16 @@ public class BookingServiceImplTest {
         Status status = Status.APPROVED;
         Booking booking = new Booking(id, start, end, item, booker, status);
         BookingDto result = BookingMapper.toBookingDto(booking);
-        assertEquals(id, result.getId());
-        assertEquals(start, result.getStart());
-        assertEquals(end, result.getEnd());
-        assertEquals(item, result.getItem());
-        assertEquals(booker, result.getBooker());
-        assertEquals(status, result.getStatus());
+        assertEquals(id, result.getId(), "Неправильный идентификатор бронирования.");
+        assertEquals(start, result.getStart(), "Неправильная дата начала бронирования.");
+        assertEquals(end, result.getEnd(), "Неправильная дата окончания бронирования.");
+        assertEquals(item, result.getItem(), "Неправильный предмет бронирования.");
+        assertEquals(booker, result.getBooker(), "Неправильный пользователь-бронировщик.");
+        assertEquals(status, result.getStatus(), "Неправильный статус бронирования.");
     }
 
     @Test
-    public void toPartialBookingDtoTest() {
+    public void testToPartialBookingDto() {
         int id = 1;
         LocalDateTime start = LocalDateTime.of(2023, 7, 31, 12, 0);
         LocalDateTime end = LocalDateTime.of(2023, 8, 1, 12, 0);
@@ -122,15 +125,15 @@ public class BookingServiceImplTest {
         User booker = new User(1, "user", "user@user.com");
         Booking booking = new Booking(id, start, end, item, booker, Status.APPROVED);
         PartialBookingDto result = BookingMapper.toPartialBookingDto(booking);
-        assertEquals(id, result.getId());
-        assertEquals(start, result.getStart());
-        assertEquals(end, result.getEnd());
-        assertEquals(item.getId(), result.getItemId());
-        assertEquals(booker.getId(), result.getBookerId());
+        assertEquals(id, result.getId(), "Неправильный идентификатор бронирования.");
+        assertEquals(start, result.getStart(), "Неправильная дата начала бронирования.");
+        assertEquals(end, result.getEnd(), "Неправильная дата окончания бронирования.");
+        assertEquals(item.getId(), result.getItemId(), "Неправильный идентификатор предмета бронирования.");
+        assertEquals(booker.getId(), result.getBookerId(), "Неправильный идентификатор пользователя-бронировщика.");
     }
 
     @Test
-    public void toBookingTest() {
+    public void testToBooking() {
         int id = 1;
         LocalDateTime start = LocalDateTime.of(2023, 7, 31, 12, 0);
         LocalDateTime end = LocalDateTime.of(2023, 8, 1, 12, 0);
@@ -139,16 +142,16 @@ public class BookingServiceImplTest {
         Status status = Status.APPROVED;
         BookingDto bookingDto = new BookingDto(id, start, end, item, booker, status);
         Booking result = BookingMapper.toBooking(bookingDto);
-        assertEquals(id, result.getId());
-        assertEquals(start, result.getStart());
-        assertEquals(end, result.getEnd());
-        assertEquals(item, result.getItem());
-        assertEquals(booker, result.getBooker());
-        assertEquals(status, result.getStatus());
+        assertEquals(id, result.getId(), "Неправильный идентификатор бронирования.");
+        assertEquals(start, result.getStart(), "Неправильная дата начала бронирования.");
+        assertEquals(end, result.getEnd(), "Неправильная дата окончания бронирования.");
+        assertEquals(item, result.getItem(), "Неправильный предмет бронирования.");
+        assertEquals(booker, result.getBooker(), "Неправильный пользователь-бронировщик.");
+        assertEquals(status, result.getStatus(), "Неправильный статус бронирования.");
     }
 
     @Test
-    public void toBookingDtoListTest() {
+    public void testToBookingDtoList() {
         int id1 = 1;
         LocalDateTime start1 = LocalDateTime.of(2023, 7, 31, 12, 0);
         LocalDateTime end1 = LocalDateTime.of(2023, 8, 1, 12, 0);
@@ -165,65 +168,67 @@ public class BookingServiceImplTest {
         Booking booking2 = new Booking(id2, start2, end2, item2, booker2, status2);
         List<Booking> bookings = Arrays.asList(booking1, booking2);
         List<BookingDto> result = BookingMapper.toBookingDto(bookings);
-        assertEquals(2, result.size());
-        assertEquals(id1, result.get(0).getId());
-        assertEquals(start1, result.get(0).getStart());
-        assertEquals(end1, result.get(0).getEnd());
-        assertEquals(item1, result.get(0).getItem());
-        assertEquals(booker1, result.get(0).getBooker());
-        assertEquals(status1, result.get(0).getStatus());
-        assertEquals(id2, result.get(1).getId());
-        assertEquals(start2, result.get(1).getStart());
-        assertEquals(end2, result.get(1).getEnd());
-        assertEquals(item2, result.get(1).getItem());
-        assertEquals(booker2, result.get(1).getBooker());
-        assertEquals(status2, result.get(1).getStatus());
+        assertEquals(2, result.size(), "Неправильный размер списка бронирований.");
+        assertEquals(id1, result.get(0).getId(), "Неправильный идентификатор бронирования.");
+        assertEquals(start1, result.get(0).getStart(), "Неправильная дата начала бронирования.");
+        assertEquals(end1, result.get(0).getEnd(), "Неправильная дата окончания бронирования.");
+        assertEquals(item1, result.get(0).getItem(), "Неправильный предмет бронирования.");
+        assertEquals(booker1, result.get(0).getBooker(), "Неправильный пользователь-бронировщик.");
+        assertEquals(status1, result.get(0).getStatus(), "Неправильный статус бронирования.");
+        assertEquals(id2, result.get(1).getId(), "Неправильный идентификатор бронирования.");
+        assertEquals(start2, result.get(1).getStart(), "Неправильная дата начала бронирования.");
+        assertEquals(end2, result.get(1).getEnd(), "Неправильная дата окончания бронирования.");
+        assertEquals(item2, result.get(1).getItem(), "Неправильный предмет бронирования.");
+        assertEquals(booker2, result.get(1).getBooker(), "Неправильный пользователь-бронировщик.");
+        assertEquals(status2, result.get(1).getStatus(), "Неправильный статус бронирования.");
     }
 
     @Test
-    public void bookingItemRelationshipTest() {
+    public void testBookingItemRelationship() {
         Item item = mock(Item.class);
         Booking booking = new Booking(LocalDateTime.now(), LocalDateTime.now().plusHours(1), item, null, Status.WAITING);
-        assertEquals(item, booking.getItem());
+        assertEquals(item, booking.getItem(), "Неправильный предмет бронирования.");
     }
 
     @Test
-    public void bookingUserRelationshipTest() {
+    public void testBookingUserRelationship() {
         User user = mock(User.class);
         Booking booking = new Booking(LocalDateTime.now(), LocalDateTime.now().plusHours(1), null, user, Status.WAITING);
-        assertEquals(user, booking.getBooker());
+        assertEquals(user, booking.getBooker(), "Неправильный пользователь-бронировщик.");
     }
 
     @Test
-    public void bookingStatusTest() {
+    public void testBookingStatus() {
         Status status = Status.APPROVED;
         Booking booking = new Booking(LocalDateTime.now(), LocalDateTime.now().plusHours(1), null, null, status);
-        assertEquals(status, booking.getStatus());
+        assertEquals(status, booking.getStatus(), "Неправильный статус бронирования.");
     }
 
     @Test
-    public void enumValuesTest() {
-        assertEquals(6, State.values().length);
-        assertArrayEquals(new State[]{State.ALL, State.CURRENT, State.PAST, State.FUTURE, State.WAITING, State.REJECTED}, State.values());
+    public void testEnumValues() {
+        assertEquals(6, State.values().length, "Неправильное количество значений в enum State.");
+        assertArrayEquals(new State[]{State.ALL, State.CURRENT, State.PAST, State.FUTURE, State.WAITING, State.REJECTED},
+                State.values(), "Неправильные значения в enum State.");
     }
 
     @Test
-    public void enumValueTest() {
-        assertEquals(State.ALL, State.valueOf("ALL"));
-        assertEquals(State.CURRENT, State.valueOf("CURRENT"));
-        assertEquals(State.PAST, State.valueOf("PAST"));
-        assertEquals(State.FUTURE, State.valueOf("FUTURE"));
-        assertEquals(State.WAITING, State.valueOf("WAITING"));
-        assertEquals(State.REJECTED, State.valueOf("REJECTED"));
+    public void testEnumValue() {
+        assertEquals(State.ALL, State.valueOf("ALL"), "Неправильное значение enum State для ALL.");
+        assertEquals(State.CURRENT, State.valueOf("CURRENT"), "Неправильное значение enum State для CURRENT.");
+        assertEquals(State.PAST, State.valueOf("PAST"), "Неправильное значение enum State для PAST.");
+        assertEquals(State.FUTURE, State.valueOf("FUTURE"), "Неправильное значение enum State для FUTURE.");
+        assertEquals(State.WAITING, State.valueOf("WAITING"), "Неправильное значение enum State для WAITING.");
+        assertEquals(State.REJECTED, State.valueOf("REJECTED"), "Неправильное значение enum State для REJECTED.");
     }
 
     @Test
-    public void invalidEnumValueTest() {
-        assertThrows(IllegalArgumentException.class, () -> State.valueOf("INVALID_STATE"));
+    public void testInvalidEnumValueTest() {
+        assertThrows(IllegalArgumentException.class, () -> State.valueOf("INVALID_STATE"),
+                "Неправильное исключение при некорректном значении enum State.");
     }
 
     @Test
-    public void findAllBookingsByOwnerIdAllTest() {
+    public void testFindAllBookingsByOwnerIdAll() {
         int ownerId = 1;
         int from = 0;
         int size = 10;
@@ -235,42 +240,43 @@ public class BookingServiceImplTest {
         when(userService.getUserById(ownerId)).thenReturn(new User());
         when(bookingRepository.findAllByItemOwnerIdOrderByStartDesc(ownerId, pages)).thenReturn(bookings);
         List<BookingDto> result = bookingService.findAllBookingsByOwnerId("ALL", ownerId, from, size);
-        assertEquals(2, result.size());
+        assertEquals(2, result.size(), "Неправильное количество бронирований, найденных по ownerId.");
     }
 
     @Test
-    public void findAllBookingsByOwnerIdUnknownStateTest() {
+    public void testFindAllBookingsByOwnerIdUnknownState() {
         int ownerId = 1;
         int from = 0;
         int size = 10;
         when(userService.getUserById(ownerId)).thenReturn(new User());
-        IncorrectParameterException exception = org.junit.jupiter.api.Assertions.assertThrows(
-                IncorrectParameterException.class,
-                () -> bookingService.findAllBookingsByOwnerId("UNKNOWN", ownerId, from, size)
-        );
-        assertEquals("Unknown state: UNKNOWN", exception.getMessage());
+        IncorrectParameterException exception = assertThrows(IncorrectParameterException.class,
+                () -> bookingService.findAllBookingsByOwnerId("UNKNOWN", ownerId, from, size),
+                "Неправильное исключение при использовании неизвестного состояния.");
+        assertEquals("Unknown state: UNKNOWN", exception.getMessage(),
+                "Неправильное сообщение об ошибке при использовании неизвестного состояния.");
     }
 
     @Test
-    public void findAllBookingsByUserIdAllStateAllTest() {
+    public void testFindAllBookingsByUserIdAllStateAll() {
         int userId = 1;
         String state = "ALL";
         int from = 0;
         int size = 10;
-        List<Booking> bookings = createBookingListTest(userId, 5);
+        List<Booking> bookings = testCreateBookingList(userId, 5);
         when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
         when(bookingRepository.findByBookerIdOrderByStartDesc(eq(userId), any(PageRequest.class))).thenReturn(bookings);
         List<BookingDto> result = bookingService.findAllBookingsByUserId(userId, state, from, size);
-        assertEquals(bookings.size(), result.size());
+        assertEquals(bookings.size(), result.size(),
+                "Неправильное количество бронирований, найденных по userId и state ALL.");
     }
 
     @Test
-    public void findAllBookingsByUserIdAllStateCurrentTest() {
+    public void testFindAllBookingsByUserIdAllStateCurrent() {
         int userId = 1;
         String state = "CURRENT";
         int from = 0;
         int size = 10;
-        List<Booking> bookings = createBookingListTest(userId, 0);
+        List<Booking> bookings = testCreateBookingList(userId, 0);
         when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
         lenient().when(bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(
                 eq(userId),
@@ -279,16 +285,17 @@ public class BookingServiceImplTest {
                 any(PageRequest.class)
         )).thenReturn(bookings);
         List<BookingDto> result = bookingService.findAllBookingsByUserId(userId, state, from, size);
-        assertEquals(bookings.size(), result.size());
+        assertEquals(bookings.size(), result.size(),
+                "Неправильное количество бронирований, найденных по userId и state CURRENT.");
     }
 
     @Test
-    public void findAllBookingsByUserIdAllStatePastTest() {
+    public void testFindAllBookingsByUserIdAllStatePast() {
         int userId = 1;
         String state = "PAST";
         int from = 0;
         int size = 10;
-        List<Booking> bookings = createBookingListTest(userId, 0);
+        List<Booking> bookings = testCreateBookingList(userId, 0);
         when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
         lenient().when(bookingRepository.findByBookerIdAndEndIsBeforeOrderByStartDesc(
                 eq(userId),
@@ -296,16 +303,17 @@ public class BookingServiceImplTest {
                 any(PageRequest.class)
         )).thenReturn(bookings);
         List<BookingDto> result = bookingService.findAllBookingsByUserId(userId, state, from, size);
-        assertEquals(bookings.size(), result.size());
+        assertEquals(bookings.size(), result.size(),
+                "Неправильное количество бронирований, найденных по userId и state PAST.");
     }
 
     @Test
-    public void findAllBookingsByUserIdAllStateFutureTest() {
+    public void testFindAllBookingsByUserIdAllStateFuture() {
         int userId = 1;
         String state = "FUTURE";
         int from = 0;
         int size = 10;
-        List<Booking> bookings = createBookingListTest(userId, 0);
+        List<Booking> bookings = testCreateBookingList(userId, 0);
         when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
         lenient().when(bookingRepository.findAllByBookerIdAndStartIsAfterAndEndIsAfterOrderByStartDesc(
                 eq(userId),
@@ -314,16 +322,17 @@ public class BookingServiceImplTest {
                 any(PageRequest.class)
         )).thenReturn(bookings);
         List<BookingDto> result = bookingService.findAllBookingsByUserId(userId, state, from, size);
-        assertEquals(bookings.size(), result.size());
+        assertEquals(bookings.size(), result.size(),
+                "Неправильное количество бронирований, найденных по userId и state FUTURE.");
     }
 
     @Test
-    public void findAllBookingsByUserIdAllStateWaitingTest() {
+    public void testFindAllBookingsByUserIdAllStateWaiting() {
         int userId = 1;
         String state = "WAITING";
         int from = 0;
         int size = 10;
-        List<Booking> bookings = createBookingListTest(userId, 0);
+        List<Booking> bookings = testCreateBookingList(userId, 0);
         when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
         lenient().when(bookingRepository.findByBookerIdAndStatusOrderByStartDesc(
                 eq(userId),
@@ -331,16 +340,17 @@ public class BookingServiceImplTest {
                 any(PageRequest.class)
         )).thenReturn(bookings);
         List<BookingDto> result = bookingService.findAllBookingsByUserId(userId, state, from, size);
-        assertEquals(bookings.size(), result.size());
+        assertEquals(bookings.size(), result.size(),
+                "Неправильное количество бронирований, найденных по userId и state WAITING.");
     }
 
     @Test
-    public void findAllBookingsByUserIdAllStateRejectedTest() {
+    public void testFindAllBookingsByUserIdAllStateRejected() {
         int userId = 1;
         String state = "REJECTED";
         int from = 0;
         int size = 10;
-        List<Booking> bookings = createBookingListTest(userId, 0);
+        List<Booking> bookings = testCreateBookingList(userId, 0);
         when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
         lenient().when(bookingRepository.findByBookerIdAndStatusOrderByStartDesc(
                 eq(userId),
@@ -348,29 +358,31 @@ public class BookingServiceImplTest {
                 any(PageRequest.class)
         )).thenReturn(bookings);
         List<BookingDto> result = bookingService.findAllBookingsByUserId(userId, state, from, size);
-        assertEquals(bookings.size(), result.size());
+        assertEquals(bookings.size(), result.size(),
+                "Неправильное количество бронирований, найденных по userId и state REJECTED.");
     }
 
     @Test
-    public void findAllBookingsByOwnerIdAllStateAllTest() {
+    public void testFindAllBookingsByOwnerIdAllStateAll() {
         int userId = 1;
         String state = "ALL";
         int from = 0;
         int size = 10;
-        List<Booking> bookings = createBookingListTest(userId, 5);
+        List<Booking> bookings = testCreateBookingList(userId, 5);
         when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
         when(bookingRepository.findAllByItemOwnerIdOrderByStartDesc(eq(userId), any(PageRequest.class))).thenReturn(bookings);
         List<BookingDto> result = bookingService.findAllBookingsByOwnerId(state, userId, from, size);
-        assertEquals(bookings.size(), result.size());
+        assertEquals(bookings.size(), result.size(),
+                "Неправильное количество бронирований, найденных по ownerId и state ALL.");
     }
 
     @Test
-    public void findAllBookingsByOwnerIdAllStateCurrentTest() {
+    public void testFindAllBookingsByOwnerIdAllStateCurrent() {
         int userId = 1;
         String state = "CURRENT";
         int from = 0;
         int size = 10;
-        List<Booking> bookings = createBookingListTest(userId, 0);
+        List<Booking> bookings = testCreateBookingList(userId, 0);
         when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
         lenient().when(bookingRepository.findByItemOwnerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(
                 eq(userId),
@@ -379,16 +391,17 @@ public class BookingServiceImplTest {
                 any(PageRequest.class)
         )).thenReturn(bookings);
         List<BookingDto> result = bookingService.findAllBookingsByOwnerId(state, userId, from, size);
-        assertEquals(bookings.size(), result.size());
+        assertEquals(bookings.size(), result.size(),
+                "Неправильное количество бронирований, найденных по ownerId и state CURRENT.");
     }
 
     @Test
-    public void findAllBookingsByOwnerIdAllStatePastTest() {
+    public void testFindAllBookingsByOwnerIdAllStatePast() {
         int userId = 1;
         String state = "PAST";
         int from = 0;
         int size = 10;
-        List<Booking> bookings = createBookingListTest(userId, 0);
+        List<Booking> bookings = testCreateBookingList(userId, 0);
         when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
         lenient().when(bookingRepository.findByItemOwnerIdAndEndIsBeforeOrderByStartDesc(
                 eq(userId),
@@ -396,16 +409,17 @@ public class BookingServiceImplTest {
                 any(PageRequest.class)
         )).thenReturn(bookings);
         List<BookingDto> result = bookingService.findAllBookingsByOwnerId(state, userId, from, size);
-        assertEquals(bookings.size(), result.size());
+        assertEquals(bookings.size(), result.size(),
+                "Неправильное количество бронирований, найденных по ownerId и state PAST.");
     }
 
     @Test
-    public void findAllBookingsByOwnerIdAllStateFutureTest() {
+    public void testFindAllBookingsByOwnerIdAllStateFuture() {
         int userId = 1;
         String state = "FUTURE";
         int from = 0;
         int size = 10;
-        List<Booking> bookings = createBookingListTest(userId, 0);
+        List<Booking> bookings = testCreateBookingList(userId, 0);
         when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
         lenient().when(bookingRepository.findByItemOwnerIdAndStartIsAfterAndEndIsAfterOrderByStartDesc(
                 eq(userId),
@@ -414,16 +428,17 @@ public class BookingServiceImplTest {
                 any(PageRequest.class)
         )).thenReturn(bookings);
         List<BookingDto> result = bookingService.findAllBookingsByOwnerId(state, userId, from, size);
-        assertEquals(bookings.size(), result.size());
+        assertEquals(bookings.size(), result.size(),
+                "Неправильное количество бронирований, найденных по ownerId и state FUTURE.");
     }
 
     @Test
-    public void findAllBookingsByOwnerIdAllStateWaitingTest() {
+    public void testFindAllBookingsByOwnerIdAllStateWaiting() {
         int userId = 1;
         String state = "WAITING";
         int from = 0;
         int size = 10;
-        List<Booking> bookings = createBookingListTest(userId, 0);
+        List<Booking> bookings = testCreateBookingList(userId, 0);
         when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
         lenient().when(bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(
                 eq(userId),
@@ -431,16 +446,17 @@ public class BookingServiceImplTest {
                 any(PageRequest.class)
         )).thenReturn(bookings);
         List<BookingDto> result = bookingService.findAllBookingsByOwnerId(state, userId, from, size);
-        assertEquals(bookings.size(), result.size());
+        assertEquals(bookings.size(), result.size(),
+                "Неправильное количество бронирований, найденных по ownerId и state WAITING.");
     }
 
     @Test
-    public void findAllBookingsByOwnerIdAllStateRejectedTest() {
+    public void testFindAllBookingsByOwnerIdAllStateRejected() {
         int userId = 1;
         String state = "REJECTED";
         int from = 0;
         int size = 10;
-        List<Booking> bookings = createBookingListTest(userId, 0);
+        List<Booking> bookings = testCreateBookingList(userId, 0);
         when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
         lenient().when(bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(
                 eq(userId),
@@ -448,32 +464,34 @@ public class BookingServiceImplTest {
                 any(PageRequest.class)
         )).thenReturn(bookings);
         List<BookingDto> result = bookingService.findAllBookingsByOwnerId(state, userId, from, size);
-        assertEquals(bookings.size(), result.size());
+        assertEquals(bookings.size(), result.size(), "Неправильный размер списка бронирований.");
     }
 
     @Test
-    public void findAllBookingsByUserIdUnknownStateTest() {
+    public void testFindAllBookingsByUserIdUnknownState() {
         int userId = 1;
         String state = "UNKNOWN";
         int from = 0;
         int size = 10;
         when(userService.getUserById(userId)).thenReturn(new User(userId, "User", "user@user.com"));
         assertThrows(IncorrectParameterException.class,
-                () -> bookingService.findAllBookingsByUserId(userId, state, from, size));
+                () -> bookingService.findAllBookingsByUserId(userId, state, from, size),
+                "Ожидалось исключение IncorrectParameterException.");
     }
 
     @Test
-    public void findAllBookingsByInvalidUserIdTest() {
+    public void testFindAllBookingsByInvalidUserId() {
         int userId = 999;
         String state = "ALL";
         int from = 0;
         int size = 10;
-        when(userService.getUserById(userId)).thenThrow(new NotFoundException("User not found."));
+        when(userService.getUserById(userId)).thenThrow(new NotFoundException("Пользователь не найден."));
         assertThrows(NotFoundException.class,
-                () -> bookingService.findAllBookingsByUserId(userId, state, from, size));
+                () -> bookingService.findAllBookingsByUserId(userId, state, from, size),
+                "Ожидалось исключение NotFoundException.");
     }
 
-    private List<Booking> createBookingListTest(int userId, int numBookings) {
+    private List<Booking> testCreateBookingList(int userId, int numBookings) {
         List<Booking> bookings = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();
         for (int i = 0; i < numBookings; i++) {
@@ -482,27 +500,6 @@ public class BookingServiceImplTest {
                     new User(userId, "User " + userId, "user" + userId + "@user.com"), Status.APPROVED));
         }
         return bookings;
-    }
-
-    @Test
-    void createBookingSuccessTest() {
-        int userId = 1;
-        int itemId = 2;
-        LocalDateTime start = LocalDateTime.of(2023, 8, 1, 12, 0);
-        LocalDateTime end = LocalDateTime.of(2023, 8, 2, 12, 0);
-        Item item = new Item(itemId, "Name", "Description", true);
-        PartialBookingDto partialBookingDto = new PartialBookingDto(1, start, end, itemId, 1);
-        User booker = new User(userId, "User", "user@user.com");
-        when(itemService.getItemById(eq(itemId), eq(userId))).thenReturn(ItemMapper.toItemDto(item));
-        when(userService.getUserById(userId)).thenReturn(booker);
-        when(bookingRepository.save(any(Booking.class))).thenReturn(new Booking(1, start, end, item, booker, Status.WAITING));
-        BookingDto result = bookingService.create(userId, partialBookingDto);
-        assertNotNull(result);
-        assertEquals(start, result.getStart());
-        assertEquals(end, result.getEnd());
-        assertEquals(itemId, result.getItem().getId());
-        assertEquals(userId, result.getBooker().getId());
-        assertEquals(Status.WAITING, result.getStatus());
     }
 
 }

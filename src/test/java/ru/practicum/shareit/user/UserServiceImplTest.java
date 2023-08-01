@@ -21,7 +21,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class UserServiceImplTest {
+class UserServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
@@ -31,50 +31,56 @@ public class UserServiceImplTest {
     private UserDto userDto;
 
     @BeforeEach
-    void setUpTest() {
+    void setUp() {
         user = new User(1, "User", "user@user.com");
         userDto = new UserDto(1, "UserDto", "userDto@userDto.com");
     }
 
     @Test
-    void createTest() {
+    void testCreate() {
         when(userRepository.save(any())).thenReturn(user);
         User createdUser = userServiceImpl.create(user);
-        Assertions.assertEquals(user, createdUser);
+        Assertions.assertEquals(user, createdUser,
+                "Ошибка при создании пользователя: объект не соответствует ожидаемому");
     }
 
     @Test
-    void updateTest() {
+    void testUpdate() {
         when(userRepository.findById(anyInt())).thenReturn(Optional.of(user));
         UserDto currentUser = userServiceImpl.update(1, userDto);
-        Assertions.assertEquals(userDto, currentUser);
+        Assertions.assertEquals(userDto, currentUser,
+                "Ошибка при обновлении пользователя: объект не соответствует ожидаемому");
     }
 
     @Test
-    void updateWhenUserIsNotFoundTest() {
+    void testUpdateWhenUserIsNotFound() {
         when(userRepository.findById(anyInt())).thenReturn(Optional.empty());
-        Assertions.assertEquals("Пользователь для отображения не найден",
-                Assertions.assertThrows(NotFoundException.class,
-                        () -> userServiceImpl.update(1, userDto)).getMessage());
+        NotFoundException exception = Assertions.assertThrows(NotFoundException.class,
+                () -> userServiceImpl.update(1, userDto),
+                "Ошибка при обновлении пользователя с несуществующим ID: исключение NotFoundException не было вызвано");
+        Assertions.assertEquals("Пользователь для отображения не найден", exception.getMessage(),
+                "Ошибка при обновлении пользователя с несуществующим ID: текст исключения не соответствует ожидаемому");
         verify(userRepository, never()).save(user);
     }
 
     @Test
-    void getUserByIdTest() {
+    void testGetUserById() {
         when(userRepository.findById(anyInt())).thenReturn(Optional.of(user));
         User actualUser = userServiceImpl.getUserById(1);
-        Assertions.assertEquals(user, actualUser);
+        Assertions.assertEquals(user, actualUser,
+                "Ошибка при получении пользователя по ID: объект не соответствует ожидаемому");
     }
 
     @Test
-    void findAllUsersTest() {
+    void testFindAllUsers() {
         when(userRepository.findAll()).thenReturn(Collections.singletonList(user));
         Collection<User> actualUsers = userServiceImpl.findAllUsers();
-        Assertions.assertEquals(Collections.singletonList(user), actualUsers);
+        Assertions.assertEquals(Collections.singletonList(user), actualUsers,
+                "Ошибка при получении всех пользователей: результат не соответствует ожидаемому");
     }
 
     @Test
-    void deleteTest() {
+    void testDelete() {
         userServiceImpl.delete(1);
         verify(userRepository, times(1)).deleteById(1);
     }

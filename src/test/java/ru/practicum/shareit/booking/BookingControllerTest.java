@@ -36,7 +36,7 @@ class BookingControllerTest {
     private BookingServiceImpl bookingServiceImpl;
 
     @Test
-    void createBookingTest() throws Exception {
+    void testCreateBooking() throws Exception {
         BookingDto bookingDto = new BookingDto();
         PartialBookingDto partialBookingDto = new PartialBookingDto();
         partialBookingDto.setStart(LocalDateTime.now().plusDays(1));
@@ -52,11 +52,11 @@ class BookingControllerTest {
                 .andReturn()
                 .getResponse()
                 .getContentAsString(Charset.defaultCharset());
-        assertEquals(bookingDto, mapper.readValue(response, BookingDto.class));
+        assertEquals(bookingDto, mapper.readValue(response, BookingDto.class), "Ожидался bookingDto, равный ответу.");
     }
 
     @Test
-    void updateBookingTest() throws Exception {
+    void testUpdateBooking() throws Exception {
         BookingDto bookingDto = new BookingDto();
         when(bookingServiceImpl.updateBooking(anyInt(), anyInt(), anyBoolean())).thenReturn(bookingDto);
         String response = mockMvc.perform(patch("/bookings/{bookingId}", 1)
@@ -69,11 +69,11 @@ class BookingControllerTest {
                 .andReturn()
                 .getResponse()
                 .getContentAsString(Charset.defaultCharset());
-        assertEquals(bookingDto, mapper.readValue(response, BookingDto.class));
+        assertEquals(bookingDto, mapper.readValue(response, BookingDto.class), "Ожидался bookingDto, равный ответу.");
     }
 
     @Test
-    void findAllBookingsByUserIdTest() throws Exception {
+    void testFindAllBookingsByUserId() throws Exception {
         List<BookingDto> bookingDtoList = new ArrayList<>();
         when(bookingServiceImpl.findAllBookingsByUserId(anyInt(), anyString(), anyInt(), anyInt()))
                 .thenReturn(bookingDtoList);
@@ -91,11 +91,11 @@ class BookingControllerTest {
                 .getContentAsString(Charset.defaultCharset());
         List<BookingDto> actualBookingList = mapper.readValue(response, new TypeReference<>() {
         });
-        assertEquals(bookingDtoList, actualBookingList);
+        assertEquals(bookingDtoList, actualBookingList, "Ожидался bookingDtoList, равный actualBookingList.");
     }
 
     @Test
-    void findAllBookingsByOwnerIdTest() throws Exception {
+    void testFindAllBookingsByOwnerId() throws Exception {
         List<BookingDto> bookingDtoList = new ArrayList<>();
         when(bookingServiceImpl.findAllBookingsByOwnerId(anyString(), anyInt(), anyInt(), anyInt()))
                 .thenReturn(bookingDtoList);
@@ -113,11 +113,11 @@ class BookingControllerTest {
                 .getContentAsString(Charset.defaultCharset());
         List<BookingDto> actualBookingList = mapper.readValue(response, new TypeReference<>() {
         });
-        assertEquals(bookingDtoList, actualBookingList);
+        assertEquals(bookingDtoList, actualBookingList, "Ожидался bookingDtoList, равный actualBookingList.");
     }
 
     @Test
-    void findBookingByIdTest() throws Exception {
+    void testFindBookingById() throws Exception {
         BookingDto bookingDto = new BookingDto();
         when(bookingServiceImpl.findBookingById(anyInt(), anyInt())).thenReturn(bookingDto);
         String response = mockMvc.perform(get("/bookings/{bookingId}", 1)
@@ -129,7 +129,7 @@ class BookingControllerTest {
                 .andReturn()
                 .getResponse()
                 .getContentAsString(Charset.defaultCharset());
-        assertEquals(bookingDto, mapper.readValue(response, BookingDto.class));
+        assertEquals(bookingDto, mapper.readValue(response, BookingDto.class), "Ожидался bookingDto, равный ответу.");
     }
 
 }

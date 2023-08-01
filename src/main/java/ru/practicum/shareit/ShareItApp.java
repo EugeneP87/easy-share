@@ -3,7 +3,7 @@ package ru.practicum.shareit;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-// Доброе утро, Ростислав! Направляю на ревью ТЗ15.
+// Доброе вечер, Ростислав! Спасибо за ревью, постарался исправить замечания.
 
 @SpringBootApplication
 public class ShareItApp {

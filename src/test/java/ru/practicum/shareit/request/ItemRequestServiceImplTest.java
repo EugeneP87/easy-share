@@ -41,25 +41,25 @@ class ItemRequestServiceImplTest {
     private Item item;
 
     @BeforeEach
-    void setUpTest() {
+    void setUp() {
         user = new User(1, "User", "user@user.com");
         item = new Item(1, "Item", "Description", true, 1, itemRequest);
         itemRequest = new ItemRequest(1, "Request", user);
     }
 
     @Test
-    void createItemRequestTest() {
+    void testCreateItemRequest() {
         when(userService.getUserById(anyInt())).thenReturn(user);
         when(itemRequestRepository.save(any(ItemRequest.class))).thenReturn(itemRequest);
         ItemRequestDto itemRequestDto = new ItemRequestDto();
         ItemRequestDto resultDto = itemRequestService.createItemRequest(1, itemRequestDto);
         verify(userService, times(1)).getUserById(1);
         verify(itemRequestRepository, times(1)).save(any(ItemRequest.class));
-        Assertions.assertNotNull(resultDto);
+        Assertions.assertNotNull(resultDto, "Ошибка при создании запроса на предмет: результат равен null");
     }
 
     @Test
-    void getItemRequestByIdTest() {
+    void testGetItemRequestById() {
         when(userService.getUserById(1)).thenReturn(user);
         when(itemRequestRepository.findById(1)).thenReturn(Optional.of(itemRequest));
         when(itemRepository.findAllByRequestId(itemRequest.getId())).thenReturn(Collections.singletonList(item));
@@ -67,12 +67,12 @@ class ItemRequestServiceImplTest {
         verify(userService, times(1)).getUserById(1);
         verify(itemRequestRepository, times(1)).findById(1);
         verify(itemRepository, times(1)).findAllByRequestId(itemRequest.getId());
-        Assertions.assertNotNull(resultDto);
-        Assertions.assertEquals(itemRequest.getId(), resultDto.getId());
+        Assertions.assertNotNull(resultDto, "Ошибка при получении запроса на предмет по ID: результат равен null");
+        Assertions.assertEquals(itemRequest.getId(), resultDto.getId(), "Ошибка при получении запроса на предмет по ID: неверный ID запроса");
     }
 
     @Test
-    void getItemRequestByOwnerIdTest() {
+    void testGetItemRequestByOwnerId() {
         when(userService.getUserById(1)).thenReturn(user);
         when(itemRequestRepository.findAllByRequestorId(1)).thenReturn(Collections.singletonList(itemRequest));
         when(itemRepository.findAllByRequestIdIn(anyList())).thenReturn(Collections.emptyList());
@@ -80,14 +80,14 @@ class ItemRequestServiceImplTest {
         verify(userService, times(1)).getUserById(1);
         verify(itemRequestRepository, times(1)).findAllByRequestorId(1);
         verify(itemRepository, times(1)).findAllByRequestIdIn(anyList());
-        Assertions.assertNotNull(resultDtos);
-        Assertions.assertEquals(1, resultDtos.size());
+        Assertions.assertNotNull(resultDtos, "Ошибка при получении запросов на предмет по ID владельца: результат равен null");
+        Assertions.assertEquals(1, resultDtos.size(), "Ошибка при получении запросов на предмет по ID владельца: неверное количество запросов");
         ItemRequestDto firstItemRequestDto = resultDtos.get(0);
-        Assertions.assertEquals(itemRequest.getId(), firstItemRequestDto.getId());
+        Assertions.assertEquals(itemRequest.getId(), firstItemRequestDto.getId(), "Ошибка при получении запросов на предмет по ID владельца: неверный ID запроса");
     }
 
     @Test
-    void findAllItemRequestsTest() {
+    void testFindAllItemRequests() {
         when(userService.getUserById(anyInt())).thenReturn(user);
         when(itemRequestRepository.findAllByRequestorIdNot(1, PageRequest.of(0, 20)))
                 .thenReturn(new ArrayList<>());
@@ -97,7 +97,7 @@ class ItemRequestServiceImplTest {
         verify(itemRequestRepository, times(1)).findAllByRequestorIdNot(1,
                 PageRequest.of(0, 20));
         verify(itemRepository, times(1)).findAllByRequestIdIn(new ArrayList<>());
-        Assertions.assertNotNull(resultDtos);
+        Assertions.assertNotNull(resultDtos, "Ошибка при получении всех запросов на предмет: результат равен null");
     }
 
 }
