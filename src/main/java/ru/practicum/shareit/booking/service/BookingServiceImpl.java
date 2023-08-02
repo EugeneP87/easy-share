@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking.service;
 
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
@@ -67,27 +68,30 @@ public class BookingServiceImpl {
     }
 
     @Transactional
-    public List<BookingDto> findAllBookingsByUserId(int userId, String state) {
+    public List<BookingDto> findAllBookingsByUserId(int userId, String state, int from, int size) {
         userServiceImpl.getUserById(userId);
+        LocalDateTime now = LocalDateTime.now();
         List<Booking> booking;
+        PageRequest pages = PageRequest.of(from / size, size);
         switch (state) {
             case "ALL":
-                booking = bookingRepository.findByBookerIdOrderByStartDesc(userId);
+                booking = bookingRepository.findByBookerIdOrderByStartDesc(userId, pages);
                 break;
             case "CURRENT":
                 booking = bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(
-                        userId, LocalDateTime.now(), LocalDateTime.now());
+                        userId, now, now, pages);
                 break;
             case "PAST":
-                booking = bookingRepository.findByBookerIdAndEndIsBeforeOrderByStartDesc(userId, LocalDateTime.now());
+                booking = bookingRepository.findByBookerIdAndEndIsBeforeOrderByStartDesc(
+                        userId, now, pages);
                 break;
             case "FUTURE":
                 booking = bookingRepository.findAllByBookerIdAndStartIsAfterAndEndIsAfterOrderByStartDesc(
-                        userId, LocalDateTime.now(), LocalDateTime.now());
+                        userId, now, now, pages);
                 break;
             case "WAITING":
             case "REJECTED":
-                booking = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.valueOf(state));
+                booking = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.valueOf(state), pages);
                 break;
             default:
                 throw new IncorrectParameterException(String.format("Unknown state: %s", state));
@@ -96,25 +100,31 @@ public class BookingServiceImpl {
     }
 
     @Transactional
-    public List<BookingDto> findAllBookingsByOwnerId(String state, int ownerId) {
+    public List<BookingDto> findAllBookingsByOwnerId(String state, int ownerId, int from, int size) {
         userServiceImpl.getUserById(ownerId);
+        LocalDateTime now = LocalDateTime.now();
         List<Booking> booking;
+        PageRequest pages = PageRequest.of(from / size, size);
         switch (state) {
             case "ALL":
-                booking = bookingRepository.findAllByItemOwnerIdOrderByStartDesc(ownerId);
+                booking = bookingRepository.findAllByItemOwnerIdOrderByStartDesc(ownerId, pages);
                 break;
             case "CURRENT":
-                booking = bookingRepository.findByItemOwnerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(ownerId, LocalDateTime.now(), LocalDateTime.now());
+                booking = bookingRepository.findByItemOwnerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(
+                        ownerId, now, now, pages);
                 break;
             case "PAST":
-                booking = bookingRepository.findByItemOwnerIdAndEndIsBeforeOrderByStartDesc(ownerId, LocalDateTime.now());
+                booking = bookingRepository.findByItemOwnerIdAndEndIsBeforeOrderByStartDesc(
+                        ownerId, now, pages);
                 break;
             case "FUTURE":
-                booking = bookingRepository.findByItemOwnerIdAndStartIsAfterAndEndIsAfterOrderByStartDesc(ownerId, LocalDateTime.now(), LocalDateTime.now());
+                booking = bookingRepository.findByItemOwnerIdAndStartIsAfterAndEndIsAfterOrderByStartDesc(
+                        ownerId, now, now, pages);
                 break;
             case "WAITING":
             case "REJECTED":
-                booking = bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(ownerId, Status.valueOf(state));
+                booking = bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(
+                        ownerId, Status.valueOf(state), pages);
                 break;
             default:
                 throw new IncorrectParameterException(String.format("Unknown state: %s", state));

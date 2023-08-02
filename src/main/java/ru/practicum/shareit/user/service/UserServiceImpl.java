@@ -45,7 +45,6 @@ public class UserServiceImpl {
 
     @Transactional
     public void delete(int id) {
-        log.info("Удаление пользователя " + getUserById(id));
         userRepository.deleteById(id);
     }
 

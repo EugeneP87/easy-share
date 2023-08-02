@@ -7,7 +7,10 @@ import ru.practicum.shareit.booking.dto.PartialBookingDto;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class BookingMapper {
+public final class BookingMapper {
+
+    public BookingMapper() {
+    }
 
     public static BookingDto toBookingDto(Booking booking) {
         return new BookingDto(

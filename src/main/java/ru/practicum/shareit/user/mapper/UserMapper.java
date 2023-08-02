@@ -7,7 +7,10 @@ import ru.practicum.shareit.user.dto.UserDto;
  * Класс UserMapper отвечает за преобразование объектов типа User в объекты типа UserDto.
  */
 
-public class UserMapper {
+public final class UserMapper {
+
+    private UserMapper() {
+    }
 
     public static UserDto toUserDto(User user) {
         return new UserDto(
@@ -17,4 +20,11 @@ public class UserMapper {
         );
     }
 
+    public static User toUser(UserDto userDto) {
+        return new User(
+                userDto.getId(),
+                userDto.getName(),
+                userDto.getEmail()
+        );
+    }
 }

@@ -7,14 +7,19 @@ import ru.practicum.shareit.item.dto.ItemDto;
  * Класс ItemMapper отвечает за преобразование объектов типа Item в объекты типа ItemDto.
  */
 
-public class ItemMapper {
+
+public final class ItemMapper {
+
+    public ItemMapper() {
+    }
 
     public static ItemDto toItemDto(Item item) {
         return new ItemDto(
                 item.getId(),
                 item.getName(),
                 item.getDescription(),
-                item.getAvailable()
+                item.getAvailable(),
+                item.getRequest() != null ? item.getRequest().getId() : 0
         );
     }
 

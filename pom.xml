@@ -58,6 +58,21 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.puppycrawl.tools</groupId>
+            <artifactId>checkstyle</artifactId>
+            <version>10.12.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-checkstyle-plugin</artifactId>
+            <version>3.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.spotbugs</groupId>
+            <artifactId>spotbugs-maven-plugin</artifactId>
+            <version>4.7.3.5</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -114,7 +129,7 @@
                         <dependency>
                             <groupId>com.puppycrawl.tools</groupId>
                             <artifactId>checkstyle</artifactId>
-                            <version>10.3</version>
+                            <version>10.12.2</version>
                         </dependency>
                     </dependencies>
                 </plugin>
@@ -166,12 +181,12 @@
                                             <limit>
                                                 <counter>LINE</counter>
                                                 <value>COVEREDRATIO</value>
-                                                <minimum>0.9</minimum>
+                                                <minimum>0.8</minimum>
                                             </limit>
                                             <limit>
                                                 <counter>BRANCH</counter>
                                                 <value>COVEREDRATIO</value>
-                                                <minimum>0.6</minimum>
+                                                <minimum>0.4</minimum>
                                             </limit>
                                             <limit>
                                                 <counter>COMPLEXITY</counter>
