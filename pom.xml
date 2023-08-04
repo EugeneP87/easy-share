@@ -78,10 +78,6 @@
                         </execution>
                     </executions>
                     <dependencies>
-                        <dependency>
-                            <groupId>com.puppycrawl.tools</groupId>
-                            <artifactId>checkstyle</artifactId>
-                        </dependency>
                     </dependencies>
                 </plugin>
                 <plugin>
