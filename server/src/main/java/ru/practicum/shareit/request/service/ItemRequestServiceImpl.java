@@ -60,10 +60,10 @@ public class ItemRequestServiceImpl {
         Map<Integer, List<Item>> itemsByRequestId = itemRepository
                 .findAllByRequestIdIn(requestIds)
                 .stream()
-                .collect(Collectors.groupingBy(item -> item.getRequest().getId()));
+                .collect(Collectors.groupingBy((Item item) -> item.getRequest().getId()));
         return itemRequests
                 .stream()
-                .map(itemRequest -> {
+                .map((ItemRequest itemRequest) -> {
                     List<ItemDto> itemDtos = itemsByRequestId.getOrDefault(itemRequest.getId(), Collections.emptyList())
                             .stream()
                             .map(ItemMapper::toItemDto)
@@ -85,10 +85,10 @@ public class ItemRequestServiceImpl {
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
         return itemRequests.stream()
-                .map(itemRequest -> ItemRequestMapper.toItemRequestDto(
+                .map((ItemRequest itemRequest) -> ItemRequestMapper.toItemRequestDto(
                         itemRequest,
                         items.stream()
-                                .filter(itemDto -> itemDto.getRequestId() == itemRequest.getId())
+                                .filter((ItemDto itemDto) -> itemDto.getRequestId() == itemRequest.getId())
                                 .collect(Collectors.toList())
                 ))
                 .collect(Collectors.toList());

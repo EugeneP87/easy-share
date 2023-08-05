@@ -106,8 +106,8 @@ public class ItemServiceImpl {
                 .sorted(Comparator.comparing(ItemDto::getId))
                 .collect(Collectors.toList());
         return item.stream()
-                .flatMap(i -> {
-                    ItemDto updatedItem = updateBooking(i);
+                .flatMap((ItemDto itemDto) -> {
+                    ItemDto updatedItem = updateBooking(itemDto);
                     List<CommentDto> comments = CommentMapper.toDtoList(commentRepository.findAllByItemId(updatedItem.getId()));
                     updatedItem.setComments(comments);
                     return Stream.of(updatedItem);

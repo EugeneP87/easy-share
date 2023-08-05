@@ -34,7 +34,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class BookingServiceImplTest {
+class BookingServiceImplTest {
 
     private BookingMapper bookingMapper;
     @Mock
@@ -57,7 +57,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void findBookingByIdTest() {
+    void findBookingByIdTest() {
         int userId = 1;
         int bookingId = 100;
         User booker = new User();
@@ -75,7 +75,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void testFindBookingByIdNotFound() {
+    void testFindBookingByIdNotFound() {
         int userId = 1;
         int bookingId = 100;
         when(bookingRepository.findById(bookingId)).thenReturn(Optional.empty());
@@ -84,7 +84,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void testFindBookingByIdNotOwner() {
+    void testFindBookingByIdNotOwner() {
         int userId = 1;
         int bookingId = 100;
         User booker = new User();
@@ -99,7 +99,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void testToBookingDto() {
+    void testToBookingDto() {
         int id = 1;
         LocalDateTime start = LocalDateTime.of(2023, 7, 31, 12, 0);
         LocalDateTime end = LocalDateTime.of(2023, 8, 1, 12, 0);
@@ -117,7 +117,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void testToPartialBookingDto() {
+    void testToPartialBookingDto() {
         int id = 1;
         LocalDateTime start = LocalDateTime.of(2023, 7, 31, 12, 0);
         LocalDateTime end = LocalDateTime.of(2023, 8, 1, 12, 0);
@@ -133,7 +133,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void testToBooking() {
+    void testToBooking() {
         int id = 1;
         LocalDateTime start = LocalDateTime.of(2023, 7, 31, 12, 0);
         LocalDateTime end = LocalDateTime.of(2023, 8, 1, 12, 0);
@@ -151,7 +151,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void testToBookingDtoList() {
+    void testToBookingDtoList() {
         int id1 = 1;
         LocalDateTime start1 = LocalDateTime.of(2023, 7, 31, 12, 0);
         LocalDateTime end1 = LocalDateTime.of(2023, 8, 1, 12, 0);
@@ -184,35 +184,35 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void testBookingItemRelationship() {
+    void testBookingItemRelationship() {
         Item item = mock(Item.class);
         Booking booking = new Booking(LocalDateTime.now(), LocalDateTime.now().plusHours(1), item, null, Status.WAITING);
         assertEquals(item, booking.getItem(), "Неправильный предмет бронирования.");
     }
 
     @Test
-    public void testBookingUserRelationship() {
+    void testBookingUserRelationship() {
         User user = mock(User.class);
         Booking booking = new Booking(LocalDateTime.now(), LocalDateTime.now().plusHours(1), null, user, Status.WAITING);
         assertEquals(user, booking.getBooker(), "Неправильный пользователь-бронировщик.");
     }
 
     @Test
-    public void testBookingStatus() {
+    void testBookingStatus() {
         Status status = Status.APPROVED;
         Booking booking = new Booking(LocalDateTime.now(), LocalDateTime.now().plusHours(1), null, null, status);
         assertEquals(status, booking.getStatus(), "Неправильный статус бронирования.");
     }
 
     @Test
-    public void testEnumValues() {
+    void testEnumValues() {
         assertEquals(6, State.values().length, "Неправильное количество значений в enum State.");
         assertArrayEquals(new State[]{State.ALL, State.CURRENT, State.PAST, State.FUTURE, State.WAITING, State.REJECTED},
                 State.values(), "Неправильные значения в enum State.");
     }
 
     @Test
-    public void testEnumValue() {
+    void testEnumValue() {
         assertEquals(State.ALL, State.valueOf("ALL"), "Неправильное значение enum State для ALL.");
         assertEquals(State.CURRENT, State.valueOf("CURRENT"), "Неправильное значение enum State для CURRENT.");
         assertEquals(State.PAST, State.valueOf("PAST"), "Неправильное значение enum State для PAST.");
@@ -222,13 +222,13 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void testInvalidEnumValueTest() {
+    void testInvalidEnumValueTest() {
         assertThrows(IllegalArgumentException.class, () -> State.valueOf("INVALID_STATE"),
                 "Неправильное исключение при некорректном значении enum State.");
     }
 
     @Test
-    public void testFindAllBookingsByOwnerIdAll() {
+    void testFindAllBookingsByOwnerIdAll() {
         int ownerId = 1;
         int from = 0;
         int size = 10;
@@ -244,7 +244,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void testFindAllBookingsByOwnerIdUnknownState() {
+    void testFindAllBookingsByOwnerIdUnknownState() {
         int ownerId = 1;
         int from = 0;
         int size = 10;
@@ -257,7 +257,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void testFindAllBookingsByUserIdAllStateAll() {
+    void testFindAllBookingsByUserIdAllStateAll() {
         int userId = 1;
         String state = "ALL";
         int from = 0;
@@ -271,7 +271,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void testFindAllBookingsByUserIdAllStateCurrent() {
+    void testFindAllBookingsByUserIdAllStateCurrent() {
         int userId = 1;
         String state = "CURRENT";
         int from = 0;
@@ -290,7 +290,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void testFindAllBookingsByUserIdAllStatePast() {
+    void testFindAllBookingsByUserIdAllStatePast() {
         int userId = 1;
         String state = "PAST";
         int from = 0;
@@ -308,7 +308,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void testFindAllBookingsByUserIdAllStateFuture() {
+    void testFindAllBookingsByUserIdAllStateFuture() {
         int userId = 1;
         String state = "FUTURE";
         int from = 0;
@@ -327,7 +327,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void testFindAllBookingsByUserIdAllStateWaiting() {
+    void testFindAllBookingsByUserIdAllStateWaiting() {
         int userId = 1;
         String state = "WAITING";
         int from = 0;
@@ -345,7 +345,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void testFindAllBookingsByUserIdAllStateRejected() {
+    void testFindAllBookingsByUserIdAllStateRejected() {
         int userId = 1;
         String state = "REJECTED";
         int from = 0;
@@ -363,7 +363,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void testFindAllBookingsByOwnerIdAllStateAll() {
+    void testFindAllBookingsByOwnerIdAllStateAll() {
         int userId = 1;
         String state = "ALL";
         int from = 0;
@@ -377,7 +377,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void testFindAllBookingsByOwnerIdAllStateCurrent() {
+    void testFindAllBookingsByOwnerIdAllStateCurrent() {
         int userId = 1;
         String state = "CURRENT";
         int from = 0;
@@ -396,7 +396,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void testFindAllBookingsByOwnerIdAllStatePast() {
+    void testFindAllBookingsByOwnerIdAllStatePast() {
         int userId = 1;
         String state = "PAST";
         int from = 0;
@@ -414,7 +414,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void testFindAllBookingsByOwnerIdAllStateFuture() {
+    void testFindAllBookingsByOwnerIdAllStateFuture() {
         int userId = 1;
         String state = "FUTURE";
         int from = 0;
@@ -433,7 +433,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void testFindAllBookingsByOwnerIdAllStateWaiting() {
+    void testFindAllBookingsByOwnerIdAllStateWaiting() {
         int userId = 1;
         String state = "WAITING";
         int from = 0;
@@ -451,7 +451,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void testFindAllBookingsByOwnerIdAllStateRejected() {
+    void testFindAllBookingsByOwnerIdAllStateRejected() {
         int userId = 1;
         String state = "REJECTED";
         int from = 0;
@@ -468,7 +468,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void testFindAllBookingsByUserIdUnknownState() {
+    void testFindAllBookingsByUserIdUnknownState() {
         int userId = 1;
         String state = "UNKNOWN";
         int from = 0;
@@ -480,7 +480,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void testFindAllBookingsByInvalidUserId() {
+    void testFindAllBookingsByInvalidUserId() {
         int userId = 999;
         String state = "ALL";
         int from = 0;

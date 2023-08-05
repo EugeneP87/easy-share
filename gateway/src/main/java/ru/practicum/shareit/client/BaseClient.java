@@ -8,7 +8,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 import java.util.Map;
 
-public abstract class BaseClient {
+public class BaseClient {
 
     protected final RestTemplate rest;
 
@@ -97,7 +97,7 @@ public abstract class BaseClient {
         return prepareGatewayResponse(shareitServerResponse);
     }
 
-    private HttpHeaders defaultHeaders(Integer userId) {
+    private static HttpHeaders defaultHeaders(Integer userId) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
